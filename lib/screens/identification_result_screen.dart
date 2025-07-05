@@ -302,27 +302,33 @@ class IdentificationResultScreen extends StatelessWidget {
   /// 解析养护建议内容
   Map<String, dynamic> _parseCareRecommendations(String content) {
     try {
-      // 尝试解析JSON格式的响应
-      final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
-      if (jsonMatch != null) {
-        final jsonData = jsonDecode(jsonMatch.group(0)!);
-        if (jsonData['care_recommendations'] != null) {
-          // 如果care_recommendations是字符串，直接返回
-          if (jsonData['care_recommendations'] is String) {
-            return {'general': jsonData['care_recommendations']};
-          }
-          // 如果care_recommendations是对象，返回对象
-          if (jsonData['care_recommendations'] is Map) {
-            return Map<String, dynamic>.from(jsonData['care_recommendations']);
-          }
+      // 首先尝试直接解析，因为从VLM API返回的可能已经是JSON字符串
+      Map<String, dynamic> jsonData;
+
+      try {
+        // 尝试直接解析JSON字符串
+        jsonData = jsonDecode(content);
+      } catch (e) {
+        // 如果直接解析失败，尝试从文本中提取JSON
+        final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
+        if (jsonMatch != null) {
+          jsonData = jsonDecode(jsonMatch.group(0)!);
+        } else {
+          // 如果都失败了，返回原始内容
+          return {'general': content};
         }
       }
-    } catch (e) {
-      // JSON解析失败
-    }
 
-    // 如果不是JSON格式或解析失败，返回原始内容
-    return {'general': content};
+      // 如果解析成功，返回解析后的数据
+      if (jsonData is Map<String, dynamic>) {
+        return jsonData;
+      } else {
+        return {'general': content};
+      }
+    } catch (e) {
+      // JSON解析失败，返回原始内容
+      return {'general': content};
+    }
   }
 
   /// 构建健康分析卡片
