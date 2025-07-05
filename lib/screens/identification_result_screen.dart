@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/plant.dart';
@@ -46,7 +47,7 @@ class IdentificationResultScreen extends StatelessWidget {
                     [
                       _buildInfoCard([
                         _buildInfoRow('植物名称', result.species),
-                        _buildInfoRow('学名', result.scientificName),
+                        _buildInfoRow('学名', result.scientificName.isNotEmpty ? result.scientificName : '暂无学名信息'),
                         _buildInfoRow('识别置信度', '${(result.confidence * 100).toStringAsFixed(1)}%'),
                       ]),
                     ],
@@ -58,7 +59,7 @@ class IdentificationResultScreen extends StatelessWidget {
                   _buildSection(
                     '🔍 健康状况分析',
                     [
-                      _buildTextCard(result.healthAnalysis),
+                      _buildAnalysisCard(_parseHealthAnalysis(result.healthAnalysis)),
                     ],
                   ),
 
@@ -68,7 +69,7 @@ class IdentificationResultScreen extends StatelessWidget {
                   _buildSection(
                     '💡 养护建议',
                     [
-                      _buildTextCard(result.careRecommendations),
+                      _buildCareRecommendationsCard(_parseCareRecommendations(result.careRecommendations)),
                     ],
                   ),
 
@@ -94,7 +95,7 @@ class IdentificationResultScreen extends StatelessWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => _retryIdentification(context),
                           icon: const Icon(Icons.refresh),
-                          label: const Text('重新识别'),
+                          label: const Text('重新上传'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
@@ -277,5 +278,219 @@ class IdentificationResultScreen extends StatelessWidget {
     } else {
       return '一般';
     }
+  }
+
+  /// 解析健康分析内容
+  String _parseHealthAnalysis(String content) {
+    try {
+      // 尝试解析JSON格式的响应
+      final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
+      if (jsonMatch != null) {
+        final jsonData = jsonDecode(jsonMatch.group(0)!);
+        if (jsonData['health_analysis'] != null) {
+          return jsonData['health_analysis'];
+        }
+      }
+    } catch (e) {
+      // JSON解析失败，返回原始内容
+    }
+
+    // 如果不是JSON格式或解析失败，返回原始内容
+    return content;
+  }
+
+  /// 解析养护建议内容
+  Map<String, dynamic> _parseCareRecommendations(String content) {
+    try {
+      // 尝试解析JSON格式的响应
+      final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
+      if (jsonMatch != null) {
+        final jsonData = jsonDecode(jsonMatch.group(0)!);
+        if (jsonData['care_recommendations'] != null) {
+          // 如果care_recommendations是字符串，直接返回
+          if (jsonData['care_recommendations'] is String) {
+            return {'general': jsonData['care_recommendations']};
+          }
+          // 如果care_recommendations是对象，返回对象
+          if (jsonData['care_recommendations'] is Map) {
+            return Map<String, dynamic>.from(jsonData['care_recommendations']);
+          }
+        }
+      }
+    } catch (e) {
+      // JSON解析失败
+    }
+
+    // 如果不是JSON格式或解析失败，返回原始内容
+    return {'general': content};
+  }
+
+  /// 构建健康分析卡片
+  Widget _buildAnalysisCard(String analysis) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.health_and_safety,
+                  color: Colors.green[600],
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '健康状态评估',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green[700],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              analysis,
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.6,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建养护建议卡片
+  Widget _buildCareRecommendationsCard(Map<String, dynamic> recommendations) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.eco,
+                  color: Colors.blue[600],
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '养护指南',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue[700],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...recommendations.entries.map((entry) => _buildCareItem(entry.key, entry.value.toString())),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建单个养护建议项
+  Widget _buildCareItem(String category, String advice) {
+    IconData icon;
+    Color color;
+    String title;
+
+    switch (category.toLowerCase()) {
+      case 'lighting':
+      case 'light':
+        icon = Icons.wb_sunny;
+        color = Colors.orange;
+        title = '光照需求';
+        break;
+      case 'watering':
+      case 'water':
+        icon = Icons.water_drop;
+        color = Colors.blue;
+        title = '浇水指导';
+        break;
+      case 'temperature':
+      case 'temp':
+        icon = Icons.thermostat;
+        color = Colors.red;
+        title = '温度要求';
+        break;
+      case 'humidity':
+        icon = Icons.opacity;
+        color = Colors.cyan;
+        title = '湿度环境';
+        break;
+      case 'fertilization':
+      case 'fertilizer':
+        icon = Icons.grass;
+        color = Colors.green;
+        title = '施肥建议';
+        break;
+      case 'pruning':
+        icon = Icons.content_cut;
+        color = Colors.purple;
+        title = '修剪护理';
+        break;
+      default:
+        icon = Icons.info;
+        color = Colors.grey;
+        title = '养护建议';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              icon,
+              size: 16,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  advice,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -153,65 +153,95 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
     });
 
     try {
-      // 步骤1: 调用iNaturalist API识别植物
-      final iNaturalistService = INaturalistApiService();
-      final identificationResult = await iNaturalistService.identifyPlant(
+      // 根据用户选择的API类型进行植物识别
+      final plantService = PlantIdentificationService();
+      final apiType = settingsProvider.plantIdentificationApiType;
+
+      // 构建API配置
+      Map<String, String> apiConfig = {};
+
+      switch (apiType) {
+        case 'inaturalist':
+          apiConfig = {
+            'apiUrl': settingsProvider.inaturalistApiUrl,
+            'token': settingsProvider.inaturalistToken,
+          };
+          break;
+        case 'plantid':
+          apiConfig = {
+            'apiKey': settingsProvider.plantIdApiKey,
+          };
+          break;
+        case 'vlm':
+          apiConfig = {
+            'apiUrl': settingsProvider.vlmApiUrl,
+            'apiKey': settingsProvider.vlmApiKey,
+            'model': settingsProvider.vlmModel,
+          };
+          break;
+      }
+
+      // 进行植物识别
+      final identificationResult = await plantService.identifyPlant(
         imageFile: imageFile,
-        apiUrl: settingsProvider.inaturalistApiUrl,
-        token: settingsProvider.inaturalistToken,
+        apiType: apiType,
+        apiConfig: apiConfig,
       );
 
-      if (identificationResult == null || identificationResult.results.isEmpty) {
+      if (identificationResult == null) {
         throw Exception('无法识别植物品种');
       }
 
-      setState(() {
-        _statusMessage = '正在分析植物健康状况...';
-      });
+      // 如果使用的不是VLM API，需要进行额外的健康分析和养护建议生成
+      String healthAnalysis = identificationResult.healthAnalysis;
+      String careRecommendations = identificationResult.careRecommendations;
 
-      // 步骤2: 调用OpenAI视觉模型分析健康状况
-      final openAIService = OpenAIApiService();
-      final imageBytes = await imageFile.readAsBytes();
-      final imageBase64 = base64Encode(imageBytes);
+      if (apiType != 'vlm') {
+        setState(() {
+          _statusMessage = '正在分析植物健康状况...';
+        });
 
-      final healthAnalysis = await openAIService.analyzeImage(
-        imageBase64: imageBase64,
-        apiUrl: settingsProvider.openaiApiUrl,
-        apiKey: settingsProvider.openaiApiKey,
-        model: settingsProvider.visionModel,
-      );
+        // 使用VLM API进行健康分析
+        final openAIService = OpenAIApiService();
+        final imageBytes = await imageFile.readAsBytes();
+        final imageBase64 = base64Encode(imageBytes);
 
-      if (healthAnalysis == null) {
-        throw Exception('健康状况分析失败');
+        final analysisResult = await openAIService.analyzeImage(
+          imageBase64: imageBase64,
+          apiUrl: settingsProvider.vlmApiUrl,
+          apiKey: settingsProvider.vlmApiKey,
+          model: settingsProvider.vlmModel,
+        );
+
+        if (analysisResult != null) {
+          healthAnalysis = analysisResult;
+        }
+
+        setState(() {
+          _statusMessage = '正在生成养护建议...';
+        });
+
+        // 使用LLM API生成养护建议
+        final careResult = await openAIService.generateCareAdvice(
+          plantSpecies: identificationResult.species,
+          healthAnalysis: healthAnalysis,
+          apiUrl: settingsProvider.llmApiUrl,
+          apiKey: settingsProvider.llmApiKey,
+          model: settingsProvider.llmModel,
+        );
+
+        if (careResult != null) {
+          careRecommendations = careResult;
+        }
       }
 
-      setState(() {
-        _statusMessage = '正在生成养护建议...';
-      });
-
-      // 步骤3: 生成养护建议
-      final bestResult = identificationResult.results.first;
-      final plantName = bestResult.taxon.preferredCommonName ?? bestResult.taxon.name;
-
-      final careAdvice = await openAIService.generateCareAdvice(
-        plantSpecies: plantName,
+      // 创建最终的识别结果
+      final finalResult = PlantIdentificationResult(
+        species: identificationResult.species,
+        scientificName: identificationResult.scientificName,
+        confidence: identificationResult.confidence,
         healthAnalysis: healthAnalysis,
-        apiUrl: settingsProvider.openaiApiUrl,
-        apiKey: settingsProvider.openaiApiKey,
-        model: settingsProvider.textModel,
-      );
-
-      if (careAdvice == null) {
-        throw Exception('养护建议生成失败');
-      }
-
-      // 创建识别结果
-      final result = PlantIdentificationResult(
-        species: plantName,
-        scientificName: bestResult.taxon.name,
-        confidence: bestResult.score,
-        healthAnalysis: healthAnalysis,
-        careRecommendations: careAdvice,
+        careRecommendations: careRecommendations,
         imagePath: imageFile.path,
       );
 
@@ -221,7 +251,7 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => IdentificationResultScreen(
-              result: result,
+              result: finalResult,
               imageFile: imageFile,
             ),
           ),

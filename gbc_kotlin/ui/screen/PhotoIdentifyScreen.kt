@@ -477,7 +477,7 @@ fun ErrorView(error: String, onRetry: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = onRetry) {
-                Text("重新识别")
+                Text("重新上传")
             }
         }
     }

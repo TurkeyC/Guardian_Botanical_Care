@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Placemark>
+      <name>我的位置</name>
+      <description>这是一个示例位置</description>
+      <Point>
+        <coordinates>30.5150662936, 114.4213734186</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

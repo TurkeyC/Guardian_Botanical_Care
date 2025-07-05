@@ -15,10 +15,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // 控制器
   final _inaturalistUrlController = TextEditingController();
   final _inaturalistTokenController = TextEditingController();
-  final _openaiUrlController = TextEditingController();
-  final _openaiKeyController = TextEditingController();
-  final _visionModelController = TextEditingController();
-  final _textModelController = TextEditingController();
+  final _llmApiUrlController = TextEditingController();
+  final _llmApiKeyController = TextEditingController();
+  final _llmModelController = TextEditingController();
+  final _vlmApiUrlController = TextEditingController();
+  final _vlmApiKeyController = TextEditingController();
+  final _vlmModelController = TextEditingController();
+  final _plantIdApiKeyController = TextEditingController();
+  final _weatherApiKeyController = TextEditingController();
+  final _weatherApiUrlController = TextEditingController();
+
+  String _selectedPlantApiType = 'inaturalist';
 
   @override
   void initState() {
@@ -32,22 +39,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settingsProvider = context.read<SettingsProvider>();
     await settingsProvider.loadSettings();
 
-    _inaturalistUrlController.text = settingsProvider.inaturalistApiUrl;
-    _inaturalistTokenController.text = settingsProvider.inaturalistToken;
-    _openaiUrlController.text = settingsProvider.openaiApiUrl;
-    _openaiKeyController.text = settingsProvider.openaiApiKey;
-    _visionModelController.text = settingsProvider.visionModel;
-    _textModelController.text = settingsProvider.textModel;
+    setState(() {
+      _selectedPlantApiType = settingsProvider.plantIdentificationApiType;
+      _inaturalistUrlController.text = settingsProvider.inaturalistApiUrl;
+      _inaturalistTokenController.text = settingsProvider.inaturalistToken;
+      _llmApiUrlController.text = settingsProvider.llmApiUrl;
+      _llmApiKeyController.text = settingsProvider.llmApiKey;
+      _llmModelController.text = settingsProvider.llmModel;
+      _vlmApiUrlController.text = settingsProvider.vlmApiUrl;
+      _vlmApiKeyController.text = settingsProvider.vlmApiKey;
+      _vlmModelController.text = settingsProvider.vlmModel;
+      _plantIdApiKeyController.text = settingsProvider.plantIdApiKey;
+      _weatherApiKeyController.text = settingsProvider.weatherApiKey;
+      _weatherApiUrlController.text = settingsProvider.weatherApiUrl;
+    });
   }
 
   @override
   void dispose() {
     _inaturalistUrlController.dispose();
     _inaturalistTokenController.dispose();
-    _openaiUrlController.dispose();
-    _openaiKeyController.dispose();
-    _visionModelController.dispose();
-    _textModelController.dispose();
+    _llmApiUrlController.dispose();
+    _llmApiKeyController.dispose();
+    _llmModelController.dispose();
+    _vlmApiUrlController.dispose();
+    _vlmApiKeyController.dispose();
+    _vlmModelController.dispose();
+    _plantIdApiKeyController.dispose();
+    _weatherApiKeyController.dispose();
+    _weatherApiUrlController.dispose();
     super.dispose();
   }
 
@@ -55,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('应用设置'),
+        title: const Text('设置'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
@@ -75,80 +95,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // iNaturalist 设置
-                _buildSectionTitle('🌿 iNaturalist API 设置'),
-                _buildTextField(
-                  controller: _inaturalistUrlController,
-                  label: 'API 地址',
-                  hint: 'https://api.inaturalist.org',
-                  validator: _validateUrl,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _inaturalistTokenController,
-                  label: 'API Token',
-                  hint: '请输入您的 iNaturalist API Token',
-                  obscureText: true,
-                  validator: _validateRequired,
-                ),
+                // 植物识别API选择
+                _buildPlantIdentificationSection(),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 32),
+                // LLM API设置
+                _buildLLMApiSection(),
+                const SizedBox(height: 24),
 
-                // OpenAI 设置
-                _buildSectionTitle('🤖 OpenAI API 设置'),
-                _buildTextField(
-                  controller: _openaiUrlController,
-                  label: 'API 地址',
-                  hint: 'https://api.openai.com',
-                  validator: _validateUrl,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _openaiKeyController,
-                  label: 'API Key',
-                  hint: '请输入您的 OpenAI API Key',
-                  obscureText: true,
-                  validator: _validateRequired,
-                ),
+                // VLM API设置
+                _buildVLMApiSection(),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 32),
+                // Weather API设置
+                _buildWeatherApiSection(),
 
-                // 模型设置
-                _buildSectionTitle('⚙️ 模型设置'),
-                _buildTextField(
-                  controller: _visionModelController,
-                  label: '视觉模型',
-                  hint: 'gpt-4-vision-preview',
-                  validator: _validateRequired,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  controller: _textModelController,
-                  label: '文本模型',
-                  hint: 'gpt-4',
-                  validator: _validateRequired,
-                ),
-
-                const SizedBox(height: 32),
-
-                // 说明文档
-                _buildHelpSection(),
-
-                const SizedBox(height: 32),
-
-                // 保存按钮
-                ElevatedButton(
-                  onPressed: _saveSettings,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                if (settingsProvider.error != null) ...[
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Colors.red[50],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        settingsProvider.error!,
+                        style: TextStyle(color: Colors.red[700]),
+                      ),
+                    ),
                   ),
-                  child: const Text(
-                    '保存设置',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
+                ],
               ],
             ),
           );
@@ -157,80 +131,135 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    bool obscureText = false,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        suffixIcon: obscureText
-            ? IconButton(
-                icon: Icon(
-                  obscureText ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    // 这里可以添加切换密码可见性的逻辑
-                  });
-                },
-              )
-            : null,
-      ),
-    );
-  }
-
-  Widget _buildHelpSection() {
+  Widget _buildPlantIdentificationSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '📖 配置说明',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            Text(
+              '植物识别设置',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+
+            // API类型选择
+            Text('识别API类型', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _selectedPlantApiType,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: '选择植物识别API',
               ),
+              items: const [
+                DropdownMenuItem(value: 'inaturalist', child: Text('iNaturalist')),
+                DropdownMenuItem(value: 'plantid', child: Text('Plant.id')),
+                DropdownMenuItem(value: 'vlm', child: Text('VLM (视觉语言模型)')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedPlantApiType = value!;
+                });
+              },
             ),
-            const SizedBox(height: 12),
-            _buildHelpItem(
-              '1. iNaturalist Token',
-              '请前往 iNaturalist.org 注册账号并获取 API Token',
+            const SizedBox(height: 16),
+
+            // 根据选择的API类型显示相应配置
+            if (_selectedPlantApiType == 'inaturalist') ..._buildINaturalistSettings(),
+            if (_selectedPlantApiType == 'plantid') ..._buildPlantIdSettings(),
+            if (_selectedPlantApiType == 'vlm')
+              Text('使用下方配置的VLM API进行植物识别',
+                style: TextStyle(color: Colors.grey[600])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildINaturalistSettings() {
+    return [
+      TextFormField(
+        controller: _inaturalistUrlController,
+        decoration: const InputDecoration(
+          labelText: 'iNaturalist API URL',
+          border: OutlineInputBorder(),
+          hintText: 'https://api.inaturalist.org',
+        ),
+        validator: (value) => value?.isEmpty == true ? '请输入API URL' : null,
+      ),
+      const SizedBox(height: 16),
+      TextFormField(
+        controller: _inaturalistTokenController,
+        decoration: const InputDecoration(
+          labelText: 'iNaturalist Token',
+          border: OutlineInputBorder(),
+          hintText: '请输入您的iNaturalist访问令牌',
+        ),
+        validator: (value) => value?.isEmpty == true ? '请输入访问令牌' : null,
+        obscureText: true,
+      ),
+    ];
+  }
+
+  List<Widget> _buildPlantIdSettings() {
+    return [
+      TextFormField(
+        controller: _plantIdApiKeyController,
+        decoration: const InputDecoration(
+          labelText: 'Plant.id API Key',
+          border: OutlineInputBorder(),
+          hintText: '请输入您的Plant.id API密钥',
+        ),
+        validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
+        obscureText: true,
+      ),
+    ];
+  }
+
+  Widget _buildLLMApiSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'LLM API设置 (文本生成)',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            _buildHelpItem(
-              '2. OpenAI API Key',
-              '请前往 platform.openai.com 获取 API Key',
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _llmApiUrlController,
+              decoration: const InputDecoration(
+                labelText: 'LLM API 完整地址',
+                border: OutlineInputBorder(),
+                hintText: 'https://api.openai.com/v1/chat/completions',
+                helperText: '请输入完整的API地址，包括版本号和端点路径',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入LLM API完整地址' : null,
             ),
-            _buildHelpItem(
-              '3. API 地址',
-              '如使用第三方代理，请修改相应的 API 地址',
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _llmApiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'LLM API Key',
+                border: OutlineInputBorder(),
+                hintText: '请输入LLM API密钥',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
+              obscureText: true,
             ),
-            _buildHelpItem(
-              '4. 模型选择',
-              '可根据需要选择不同的 GPT 模型版本',
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _llmModelController,
+              decoration: const InputDecoration(
+                labelText: 'LLM 模型',
+                border: OutlineInputBorder(),
+                hintText: 'gpt-4',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
             ),
           ],
         ),
@@ -238,85 +267,135 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildHelpItem(String title, String description) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          Text(
-            description,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
+  Widget _buildVLMApiSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'VLM API设置 (图像理解)',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _vlmApiUrlController,
+              decoration: const InputDecoration(
+                labelText: 'VLM API 完整地址',
+                border: OutlineInputBorder(),
+                hintText: 'https://api.openai.com/v1/chat/completions',
+                helperText: '请输入完整的API地址，包括版本号和端点路径',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入VLM API完整地址' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _vlmApiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'VLM API Key',
+                border: OutlineInputBorder(),
+                hintText: '请输入VLM API密钥',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _vlmModelController,
+              decoration: const InputDecoration(
+                labelText: 'VLM 模型',
+                border: OutlineInputBorder(),
+                hintText: 'gpt-4-vision-preview',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  String? _validateRequired(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return '此字段不能为空';
-    }
-    return null;
+  Widget _buildWeatherApiSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Weather API设置',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _weatherApiUrlController,
+              decoration: const InputDecoration(
+                labelText: 'Weather API URL',
+                border: OutlineInputBorder(),
+                hintText: 'https://api.weatherapi.com/v1',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入Weather API URL' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _weatherApiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'Weather API Key',
+                border: OutlineInputBorder(),
+                hintText: '请输入Weather API密钥',
+              ),
+              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
+              obscureText: true,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  String? _validateUrl(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return '此字段不能为空';
-    }
-    final uri = Uri.tryParse(value);
-    if (uri == null || !uri.hasAbsolutePath) {
-      return '请输入有效的URL地址';
-    }
-    return null;
-  }
-
-  void _saveSettings() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  Future<void> _saveSettings() async {
+    if (!_formKey.currentState!.validate()) return;
 
     final settingsProvider = context.read<SettingsProvider>();
 
-    // 保存 iNaturalist 设置
+    // 保存植物识别API类型
+    await settingsProvider.updatePlantIdentificationApiType(_selectedPlantApiType);
+
+    // 保存iNaturalist设置
     await settingsProvider.updateINaturalistSettings(
-      apiUrl: _inaturalistUrlController.text.trim(),
-      token: _inaturalistTokenController.text.trim(),
+      apiUrl: _inaturalistUrlController.text,
+      token: _inaturalistTokenController.text,
     );
 
-    // 保存 OpenAI 设置
-    await settingsProvider.updateOpenAISettings(
-      apiUrl: _openaiUrlController.text.trim(),
-      apiKey: _openaiKeyController.text.trim(),
+    // 保存LLM设置
+    await settingsProvider.updateLLMSettings(
+      apiUrl: _llmApiUrlController.text,
+      apiKey: _llmApiKeyController.text,
+      model: _llmModelController.text,
     );
 
-    // 保存模型设置
-    await settingsProvider.updateModelSettings(
-      visionModel: _visionModelController.text.trim(),
-      textModel: _textModelController.text.trim(),
+    // 保存VLM设置
+    await settingsProvider.updateVLMSettings(
+      apiUrl: _vlmApiUrlController.text,
+      apiKey: _vlmApiKeyController.text,
+      model: _vlmModelController.text,
     );
 
-    if (settingsProvider.error != null) {
+    // 保存Plant.id设置
+    await settingsProvider.updatePlantIdSettings(
+      apiKey: _plantIdApiKeyController.text,
+    );
+
+    // 保存Weather设置
+    await settingsProvider.updateWeatherSettings(
+      apiKey: _weatherApiKeyController.text,
+      apiUrl: _weatherApiUrlController.text,
+    );
+
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(settingsProvider.error!),
-          backgroundColor: Colors.red,
-        ),
-      );
-      settingsProvider.clearError();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('设置已保存'),
-          backgroundColor: Colors.green,
-        ),
+        const SnackBar(content: Text('设置已保存')),
       );
     }
   }

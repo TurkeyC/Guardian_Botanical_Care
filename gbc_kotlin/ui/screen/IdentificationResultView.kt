@@ -97,7 +97,7 @@ fun IdentificationResultView(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("重新识别")
+                    Text("重新上传")
                 }
 
                 Button(

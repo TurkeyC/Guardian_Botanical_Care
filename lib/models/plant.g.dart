@@ -151,3 +151,58 @@ Choice _$ChoiceFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
   'message': instance.message,
 };
+
+WeatherInfo _$WeatherInfoFromJson(Map<String, dynamic> json) => WeatherInfo(
+  location: Location.fromJson(json['location'] as Map<String, dynamic>),
+  current: Current.fromJson(json['current'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$WeatherInfoToJson(WeatherInfo instance) =>
+    <String, dynamic>{
+      'location': instance.location,
+      'current': instance.current,
+    };
+
+Location _$LocationFromJson(Map<String, dynamic> json) => Location(
+  name: json['name'] as String,
+  region: json['region'] as String,
+  country: json['country'] as String,
+  lat: (json['lat'] as num).toDouble(),
+  lon: (json['lon'] as num).toDouble(),
+);
+
+Map<String, dynamic> _$LocationToJson(Location instance) => <String, dynamic>{
+  'name': instance.name,
+  'region': instance.region,
+  'country': instance.country,
+  'lat': instance.lat,
+  'lon': instance.lon,
+};
+
+Current _$CurrentFromJson(Map<String, dynamic> json) => Current(
+  tempC: (json['temp_c'] as num).toDouble(),
+  tempF: (json['temp_f'] as num).toDouble(),
+  condition: Condition.fromJson(json['condition'] as Map<String, dynamic>),
+  windKph: (json['wind_kph'] as num).toDouble(),
+  humidity: (json['humidity'] as num).toInt(),
+  feelslikeC: (json['feelslike_c'] as num).toDouble(),
+  uv: (json['uv'] as num).toDouble(),
+);
+
+Map<String, dynamic> _$CurrentToJson(Current instance) => <String, dynamic>{
+  'temp_c': instance.tempC,
+  'temp_f': instance.tempF,
+  'condition': instance.condition,
+  'wind_kph': instance.windKph,
+  'humidity': instance.humidity,
+  'feelslike_c': instance.feelslikeC,
+  'uv': instance.uv,
+};
+
+Condition _$ConditionFromJson(Map<String, dynamic> json) =>
+    Condition(text: json['text'] as String, icon: json['icon'] as String);
+
+Map<String, dynamic> _$ConditionToJson(Condition instance) => <String, dynamic>{
+  'text': instance.text,
+  'icon': instance.icon,
+};

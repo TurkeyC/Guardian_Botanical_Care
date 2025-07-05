@@ -168,3 +168,83 @@ class Choice {
       _$ChoiceFromJson(json);
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 }
+
+@JsonSerializable()
+class WeatherInfo {
+  final Location location;
+  final Current current;
+
+  const WeatherInfo({
+    required this.location,
+    required this.current,
+  });
+
+  factory WeatherInfo.fromJson(Map<String, dynamic> json) =>
+      _$WeatherInfoFromJson(json);
+  Map<String, dynamic> toJson() => _$WeatherInfoToJson(this);
+}
+
+@JsonSerializable()
+class Location {
+  final String name;
+  final String region;
+  final String country;
+  final double lat;
+  final double lon;
+
+  const Location({
+    required this.name,
+    required this.region,
+    required this.country,
+    required this.lat,
+    required this.lon,
+  });
+
+  factory Location.fromJson(Map<String, dynamic> json) =>
+      _$LocationFromJson(json);
+  Map<String, dynamic> toJson() => _$LocationToJson(this);
+}
+
+@JsonSerializable()
+class Current {
+  @JsonKey(name: 'temp_c')
+  final double tempC;
+  @JsonKey(name: 'temp_f')
+  final double tempF;
+  final Condition condition;
+  @JsonKey(name: 'wind_kph')
+  final double windKph;
+  final int humidity;
+  @JsonKey(name: 'feelslike_c')
+  final double feelslikeC;
+  final double uv;
+
+  const Current({
+    required this.tempC,
+    required this.tempF,
+    required this.condition,
+    required this.windKph,
+    required this.humidity,
+    required this.feelslikeC,
+    required this.uv,
+  });
+
+  factory Current.fromJson(Map<String, dynamic> json) =>
+      _$CurrentFromJson(json);
+  Map<String, dynamic> toJson() => _$CurrentToJson(this);
+}
+
+@JsonSerializable()
+class Condition {
+  final String text;
+  final String icon;
+
+  const Condition({
+    required this.text,
+    required this.icon,
+  });
+
+  factory Condition.fromJson(Map<String, dynamic> json) =>
+      _$ConditionFromJson(json);
+  Map<String, dynamic> toJson() => _$ConditionToJson(this);
+}
