@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -435,7 +436,7 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
           children: [
             Text('健康状态: ${plant.healthStatus}'),
             if (plant.wateringFrequency.isNotEmpty)
-              Text('浇水提醒: ${plant.wateringFrequency}'),
+              Text('浇水提醒: ${_parseSimpleText(plant.wateringFrequency)}'),
           ],
         ),
         trailing: IconButton(
@@ -446,5 +447,31 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
         ),
       ),
     )).toList();
+  }
+
+  /// 简单文本解析，支持解析带有换行的文本和JSON格式
+  String _parseSimpleText(String content) {
+    try {
+      // 尝试解析JSON，提取具体的值
+      final jsonData = jsonDecode(content);
+      if (jsonData is Map<String, dynamic>) {
+        // 如果是JSON对象，尝试提取有用的信息
+        if (jsonData.containsKey('watering')) {
+          return jsonData['watering'].toString();
+        } else if (jsonData.containsKey('lighting')) {
+          return jsonData['lighting'].toString();
+        } else if (jsonData.containsKey('fertilization')) {
+          return jsonData['fertilization'].toString();
+        } else {
+          // 如果找不到特定字段，返回第一个值
+          return jsonData.values.first.toString();
+        }
+      }
+    } catch (e) {
+      // JSON解析失败，按照普通文本处理
+    }
+
+    // 普通文本处理：替换换行符为逗号并去除多余空格
+    return content.replaceAll('\n', ', ').replaceAll(RegExp(r',\s*'), ', ').trim();
   }
 }

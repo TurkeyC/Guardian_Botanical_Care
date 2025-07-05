@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/plant_provider.dart';
 import '../models/plant.dart';
 import 'plant_detail_screen.dart';
+import 'dart:io';
 
 class MyPlantsScreen extends StatefulWidget {
   const MyPlantsScreen({super.key});
@@ -174,8 +176,8 @@ class PlantCard extends StatelessWidget {
                           errorBuilder: (context, error, stackTrace) =>
                               _buildPlaceholderImage(),
                         )
-                      : Image.asset(
-                          plant.imagePath,
+                      : Image.file(
+                          File(plant.imagePath),
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               _buildPlaceholderImage(),
