@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/plant.dart';
@@ -23,19 +24,7 @@ class PlantDetailScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               height: 250,
-              child: plant.imagePath.startsWith('http')
-                  ? Image.network(
-                      plant.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildPlaceholderImage(),
-                    )
-                  : Image.asset(
-                      plant.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildPlaceholderImage(),
-                    ),
+              child: _buildPlantImage(),
             ),
 
             Padding(
@@ -84,6 +73,38 @@ class PlantDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildPlantImage() {
+    // 检查图片路径类型并选择合适的显示方式
+    if (plant.imagePath.startsWith('http')) {
+      // 网络图片
+      return Image.network(
+        plant.imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+      );
+    } else if (plant.imagePath.startsWith('assets/')) {
+      // Asset资源图片
+      return Image.asset(
+        plant.imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+      );
+    } else {
+      // 本地文件图片
+      final imageFile = File(plant.imagePath);
+      if (imageFile.existsSync()) {
+        return Image.file(
+          imageFile,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+        );
+      } else {
+        // 文件不存在，显示占位图
+        return _buildPlaceholderImage();
+      }
+    }
   }
 
   Widget _buildPlaceholderImage() {
