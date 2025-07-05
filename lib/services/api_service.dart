@@ -397,7 +397,7 @@ class PlantIdentificationService {
 {
   "species": "植物的中文常见名称",
   "scientific_name": "植物的拉丁学名",
-  "confidence": 0.95,
+  "confidence": "0.50到0.95之间的数字，表示识别置信度",
   "health_analysis": "植物的健康状况详细分析，包括叶片状态、生长情况等",
   "care_recommendations": {
     "lighting": "光照需求建议",

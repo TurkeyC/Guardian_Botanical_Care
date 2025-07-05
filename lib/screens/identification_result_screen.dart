@@ -268,35 +268,175 @@ class IdentificationResultScreen extends StatelessWidget {
   }
 
   String _extractHealthStatus(String healthAnalysis) {
-    final healthyKeywords = ['健康', '良好', '正常'];
-    final unhealthyKeywords = ['病', '虫', '枯', '黄', '不健康'];
+    // 先解析JSON格式的健康分析内容
+    String parsedContent = _parseHealthAnalysis(healthAnalysis);
 
-    if (unhealthyKeywords.any((keyword) => healthAnalysis.contains(keyword))) {
-      return '不健康';
-    } else if (healthyKeywords.any((keyword) => healthAnalysis.contains(keyword))) {
-      return '健康';
-    } else {
-      return '一般';
+    // 调试输出
+    print('原始健康分析内容: $healthAnalysis');
+    print('解析后的内容: $parsedContent');
+
+    // 首先检查明确的不健康状态 - 使用更精确的词汇避免误判
+    final unhealthyKeywords = ['不健康', '病害', '虫害', '枯萎', '病虫害', '患病', '萎蔫', '腐烂', '斑点', '虫蛀', '病变', '感染', '叶片发黄', '黄化病', '枯黄'];
+    // 然后检查健康状态 - 使用更精确的匹配
+    final healthyKeywords = ['健康良好', '生长旺盛', '状态良好', '鲜绿', '茁壮', '正常生长', '长势良好', '表明健康', '显示健康', '看起来健康', '健康状况', '良好的生长', '显示出良好'];
+    // 最后检查一般状态
+    final normalKeywords = ['一般', '普通', '尚可', '中等'];
+
+    String result;
+
+    // 优先检查明确的不健康关键词
+    if (unhealthyKeywords.any((keyword) => parsedContent.contains(keyword))) {
+      result = '不健康';
+      print('匹配到不健康关键词');
     }
+    // 检查健康关键词
+    else if (healthyKeywords.any((keyword) => parsedContent.contains(keyword))) {
+      result = '健康';
+      print('匹配到健康关键词');
+    }
+    // 特殊处理：如果包含"健康"但不包含明确的不健康词汇
+    else if (parsedContent.contains('健康') && !unhealthyKeywords.any((keyword) => parsedContent.contains(keyword))) {
+      result = '健康';
+      print('包含健康但无不健康关键词');
+    }
+    // 检查一般状态关键词
+    else if (normalKeywords.any((keyword) => parsedContent.contains(keyword))) {
+      result = '一般';
+      print('匹配到一般关键词');
+    }
+    // 如果都没有匹配到，默认返回健康（积极判断）
+    else {
+      result = '健康';
+      print('默认判断为健康');
+    }
+
+    print('最终健康状态判断结果: $result');
+    return result;
   }
 
   /// 解析健康分析内容
   String _parseHealthAnalysis(String content) {
     try {
-      // 尝试解析JSON格式的响应
+      // 首先检查是否是Map格式的字符串
+      if (content.startsWith('{') && content.endsWith('}')) {
+        // 尝试将Map格式字符串转换为JSON并解析
+        String jsonString = content
+            .replaceAllMapped(RegExp(r'(\w+):'), (match) => '"${match.group(1)}":')  // 给key加引号
+            .replaceAllMapped(RegExp(r': ([^,}]+)'), (match) => ': "${match.group(1)}"');  // 给value加引号
+
+        try {
+          final jsonData = jsonDecode(jsonString);
+          return _formatHealthAnalysisFromMap(jsonData);
+        } catch (e) {
+          // 如果JSON转换失败，手动解析Map格式
+          return _parseMapFormatContent(content);
+        }
+      }
+
+      // 尝试解析标准JSON格式的响应
       final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(content);
       if (jsonMatch != null) {
         final jsonData = jsonDecode(jsonMatch.group(0)!);
-        if (jsonData['health_analysis'] != null) {
-          return jsonData['health_analysis'];
-        }
+        return _formatHealthAnalysisFromMap(jsonData);
       }
     } catch (e) {
       // JSON解析失败，返回原始内容
+      print('JSON解析失败: $e');
     }
 
     // 如果不是JSON格式或解析失败，返回原始内容
     return content;
+  }
+
+  /// 格式化从Map解析出的健康分析内容
+  String _formatHealthAnalysisFromMap(Map<String, dynamic> jsonData) {
+    StringBuffer result = StringBuffer();
+
+    // 如果有health_analysis字段，直接返回
+    if (jsonData['health_analysis'] != null) {
+      return jsonData['health_analysis'];
+    }
+
+    // 如果是叶片状况和生长状态的格式
+    if (jsonData['leaf_condition'] != null || jsonData['growth_status'] != null) {
+      if (jsonData['leaf_condition'] != null) {
+        result.write('叶片状况：${jsonData['leaf_condition']}');
+      }
+      if (jsonData['growth_status'] != null) {
+        if (result.isNotEmpty) result.write('\n\n');
+        result.write('生长状态：${jsonData['growth_status']}');
+      }
+      return result.toString();
+    }
+
+    // 处理其他可能的JSON字段
+    for (var entry in jsonData.entries) {
+      if (result.isNotEmpty) result.write('\n\n');
+      String key = _translateKey(entry.key);
+      result.write('$key：${entry.value}');
+    }
+
+    return result.toString();
+  }
+
+  /// 手动解析Map格式的内容
+  String _parseMapFormatContent(String content) {
+    StringBuffer result = StringBuffer();
+
+    // 移除开头和结尾的大括号
+    String cleanContent = content.substring(1, content.length - 1);
+
+    // 按逗号分割键值对
+    List<String> pairs = [];
+    int braceCount = 0;
+    int start = 0;
+
+    for (int i = 0; i < cleanContent.length; i++) {
+      if (cleanContent[i] == '{') braceCount++;
+      if (cleanContent[i] == '}') braceCount--;
+      if (cleanContent[i] == ',' && braceCount == 0) {
+        pairs.add(cleanContent.substring(start, i).trim());
+        start = i + 1;
+      }
+    }
+    pairs.add(cleanContent.substring(start).trim());
+
+    // 解析每个键值对
+    for (String pair in pairs) {
+      int colonIndex = pair.indexOf(':');
+      if (colonIndex > 0) {
+        String key = pair.substring(0, colonIndex).trim();
+        String value = pair.substring(colonIndex + 1).trim();
+
+        String translatedKey = _translateKey(key);
+        if (result.isNotEmpty) result.write('\n\n');
+        result.write('$translatedKey：$value');
+      }
+    }
+
+    return result.toString();
+  }
+
+  /// 翻译JSON字段名为中文
+  String _translateKey(String key) {
+    switch (key.toLowerCase()) {
+      case 'leaf_condition':
+        return '叶片状况';
+      case 'growth_status':
+        return '生长状态';
+      case 'health_status':
+        return '健康状态';
+      case 'overall_health':
+        return '整体健康';
+      case 'disease_signs':
+        return '病害征象';
+      case 'pest_signs':
+        return '虫害征象';
+      case 'recommendations':
+        return '建议';
+      default:
+        return key;
+    }
   }
 
   /// 解析养护建议内容
