@@ -10,7 +10,8 @@ class DiagnosisScreen extends StatelessWidget {
         title: const Text('专业诊断'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Padding(
+      body: SingleChildScrollView(  // 添加这个组件使内容可滚动
+      child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -66,9 +67,12 @@ class DiagnosisScreen extends StatelessWidget {
               isPro: true, // 会员功能
               onTap: () => _showOnlyForPro(context, '专家咨询'),
             ),
+            // 底部添加额外的空间确保在小屏幕上有足够的滚动空间
+            const SizedBox(height: 24),
           ],
         ),
       ),
+    ),
     );
   }
 
