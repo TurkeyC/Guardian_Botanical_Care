@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/plant.dart';
+import '../themes/app_themes.dart';
 
 class SettingsService {
   // API服务类型
@@ -26,6 +26,9 @@ class SettingsService {
   // Weather API 设置
   static const String _weatherApiKeyKey = 'weather_api_key';
   static const String _weatherApiUrlKey = 'weather_api_url';
+
+  // 主题设置
+  static const String _themeTypeKey = 'theme_type';
 
   // 植物识别API类型 (inaturalist, plantid, vlm)
   Future<String> getPlantIdentificationApiType() async {
@@ -151,6 +154,19 @@ class SettingsService {
   Future<void> setWeatherApiUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_weatherApiUrlKey, url);
+  }
+
+  // 主题相关方法
+  Future<AppThemeType> getThemeType() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = prefs.getString(_themeTypeKey) ?? 'minimal';
+    return themeString == 'dynamic' ? AppThemeType.dynamic : AppThemeType.minimal;
+  }
+
+  Future<void> setThemeType(AppThemeType themeType) async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = themeType == AppThemeType.dynamic ? 'dynamic' : 'minimal';
+    await prefs.setString(_themeTypeKey, themeString);
   }
 
   // 验证设置完整性

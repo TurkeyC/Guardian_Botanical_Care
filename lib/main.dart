@@ -8,6 +8,7 @@ import 'screens/settings_screen.dart';
 import 'services/api_service.dart';
 import 'providers/plant_provider.dart';
 import 'providers/settings_provider.dart';
+import 'themes/app_themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,13 +32,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Guardian Botanical Care',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      home: const MainScreen(),
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) {
+        // 在应用启动时加载设置
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!settingsProvider.isLoading) {
+            settingsProvider.loadSettings();
+          }
+        });
+
+        return MaterialApp(
+          title: 'Guardian Botanical Care',
+          theme: AppThemes.getTheme(settingsProvider.currentTheme),
+          home: const MainScreen(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

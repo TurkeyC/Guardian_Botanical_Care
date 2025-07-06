@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../services/settings_service.dart';
+import '../themes/app_themes.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final SettingsService _settingsService = SettingsService();
@@ -28,6 +29,9 @@ class SettingsProvider extends ChangeNotifier {
   String _weatherApiKey = '';
   String _weatherApiUrl = 'https://api.weatherapi.com/v1';
 
+  // 主题设置
+  AppThemeType _currentTheme = AppThemeType.minimal;
+
   bool _isLoading = false;
   String? _error;
 
@@ -44,6 +48,7 @@ class SettingsProvider extends ChangeNotifier {
   String get plantIdApiKey => _plantIdApiKey;
   String get weatherApiKey => _weatherApiKey;
   String get weatherApiUrl => _weatherApiUrl;
+  AppThemeType get currentTheme => _currentTheme;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -51,6 +56,7 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> loadSettings() async {
     _setLoading(true);
     try {
+      _currentTheme = await _settingsService.getThemeType();
       _plantIdentificationApiType = await _settingsService.getPlantIdentificationApiType();
       _inaturalistApiUrl = await _settingsService.getINaturalistApiUrl();
       _inaturalistToken = await _settingsService.getINaturalistToken();
@@ -187,6 +193,18 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _error = '更新 Weather API 设置失败: $e';
+      notifyListeners();
+    }
+  }
+
+  /// 更新主题
+  Future<void> updateTheme(AppThemeType theme) async {
+    try {
+      await _settingsService.setThemeType(theme);
+      _currentTheme = theme;
+      notifyListeners();
+    } catch (e) {
+      _error = '更新主题失败: $e';
       notifyListeners();
     }
   }
