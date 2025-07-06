@@ -30,7 +30,7 @@ class SettingsProvider extends ChangeNotifier {
   String _weatherApiUrl = 'https://api.weatherapi.com/v1';
 
   // 主题设置
-  AppThemeType _currentTheme = AppThemeType.minimal;
+  AppThemeType _currentTheme = AppThemeType.dynamic;
 
   bool _isLoading = false;
   String? _error;

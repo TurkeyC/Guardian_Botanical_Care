@@ -158,7 +158,7 @@ class SettingsService {
   // 主题相关方法
   Future<AppThemeType> getThemeType() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeString = prefs.getString(_themeTypeKey) ?? 'minimal';
+    final themeString = prefs.getString(_themeTypeKey) ?? 'dynamic';
     return themeString == 'dynamic' ? AppThemeType.dynamic : AppThemeType.minimal;
   }
 

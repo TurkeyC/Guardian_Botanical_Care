@@ -5,11 +5,13 @@ import 'screens/care_reminder_screen.dart';
 import 'screens/photo_identify_screen.dart';
 import 'screens/diagnosis_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/membership_screen.dart'; // 添加会员页面导入
 import 'services/api_service.dart';
 import 'providers/plant_provider.dart';
 import 'providers/settings_provider.dart';
 import 'themes/app_themes.dart';
 import 'widgets/apple_style_widgets.dart';
+import 'screens/splash_screen.dart'; // 添加启动页导入
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +47,13 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Guardian Botanical Care',
           theme: AppThemes.getTheme(settingsProvider.currentTheme),
-          home: const MainScreen(),
+          home: const SplashScreen(), // 使用SplashScreen作为入口
           debugShowCheckedModeBanner: false,
+          // 添加路由配置
+          routes: {
+            '/home': (context) => const MainScreen(), // 添加主屏幕路由
+            '/membership': (context) => const MembershipScreen(), // 添加会员窗口路由
+          },
         );
       },
     );

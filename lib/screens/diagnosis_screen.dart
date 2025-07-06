@@ -182,13 +182,64 @@ class DiagnosisScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(feature),
-        content: const Text('该功能属于Pro会员专属功能！'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('该功能属于Pro会员专属功能！'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A1A).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withOpacity(0.3),
+                ),
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.workspace_premium,
+                    color: Color(0xFFD4AF37),
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '开通Pro会员，立即享受专业植物诊断服务',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('确定'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              // 先关闭对话框
+              Navigator.pop(context);
+              // 跳转到会员页面
+              Navigator.pushNamed(context, '/membership');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: Colors.black,
+            ),
+            child: const Text('开通Pro会员'),
+          ),
         ],
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
       ),
     );
   }

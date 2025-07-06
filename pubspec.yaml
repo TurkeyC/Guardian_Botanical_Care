@@ -59,9 +59,13 @@ dependencies:
 
   # JSON序列化
   json_annotation: ^4.8.1
+  shimmer: ^3.0.0
 
   # 通知 - 暂时注释掉，避免构建问题
   # flutter_local_notifications: ^16.3.2
+
+  # 启动页面
+  flutter_native_splash: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +76,9 @@ dev_dependencies:
   # JSON代码生成
   build_runner: ^2.4.7
   json_serializable: ^6.7.1
+
+  # 启动页面
+  flutter_native_splash: ^2.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -90,6 +97,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -116,3 +124,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# flutter_native_splash 配置开屏启动页面
+flutter_native_splash:
+  color: "#FFFFFF"  # 背景色
+  image: assets/images/nina.png
+  fullscreen: true  # 设置为全屏显示
+
+  # 针对 Android 12 的特定配置
+  android_12:
+    image: assets/images/nina.png
+    icon_background_color: "#FFFFFF"

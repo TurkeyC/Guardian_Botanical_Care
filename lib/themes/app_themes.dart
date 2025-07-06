@@ -253,7 +253,7 @@ class AppThemes {
       case AppThemeType.minimal:
         return '简洁清爽的设计风格';
       case AppThemeType.dynamic:
-        return '苹果风格的2.5D灵动设计';
+        return '2.5D灵动设计';
     }
   }
 }

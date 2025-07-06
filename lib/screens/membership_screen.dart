@@ -13,10 +13,22 @@ class _MembershipScreenState extends State<MembershipScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700); // 金色
+
+    // 根据会员状态定义颜色
+    final screenBackgroundColor = _isPro ? Colors.black : theme.scaffoldBackgroundColor;
+    final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
+    final textColor = _isPro ? Colors.white : theme.textTheme.bodyLarge?.color;
+    final appBarBackgroundColor = _isPro ? Colors.grey[900] : theme.colorScheme.inversePrimary;
+
     return Scaffold(
+      backgroundColor: screenBackgroundColor,
       appBar: AppBar(
         title: const Text('会员服务'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: appBarBackgroundColor,
+        titleTextStyle: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -63,7 +75,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 Text(
-                  '切换Pro会员状态',
+                  '预览Pro会员状态',
                   style: TextStyle(color: Colors.black54),
                 ),
                 Text(
@@ -169,6 +181,15 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildProFeatures(BuildContext context) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700); // 金色
+
+    // 根据会员状态定义颜色
+    final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
+    final textColor = _isPro ? Colors.white : theme.textTheme.bodyLarge?.color;
+    final secondaryTextColor = _isPro ? Colors.white70 : theme.textTheme.bodyMedium?.color;
+    final primaryColor = _isPro ? proColor : theme.colorScheme.primary;
+
     final features = [
       {
         'icon': Icons.auto_awesome,
@@ -208,6 +229,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
     ];
 
     return Card(
+      color: cardBackgroundColor,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -217,12 +239,12 @@ class _MembershipScreenState extends State<MembershipScreen> {
               children: [
                 Icon(
                   Icons.star,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: primaryColor,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Pro会员特权',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(color: textColor),
                 ),
               ],
             ),
@@ -235,12 +257,12 @@ class _MembershipScreenState extends State<MembershipScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                      color: primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       feature['icon'] as IconData,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -250,11 +272,11 @@ class _MembershipScreenState extends State<MembershipScreen> {
                       children: [
                         Text(
                           feature['title'] as String,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: theme.textTheme.titleMedium?.copyWith(color: textColor),
                         ),
                         Text(
                           feature['subtitle'] as String,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                         ),
                       ],
                     ),
@@ -269,6 +291,15 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildSubscriptionOptions(BuildContext context) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700); // 金色
+
+    // 根据会员状态定义颜色
+    final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
+    final textColor = _isPro ? Colors.white : theme.textTheme.bodyLarge?.color;
+    final secondaryTextColor = _isPro ? Colors.white70 : theme.textTheme.bodyMedium?.color;
+    final primaryColor = _isPro ? proColor : theme.colorScheme.primary;
+
     final plans = [
       {
         'title': '月度会员',
@@ -298,6 +329,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
     ];
 
     return Card(
+      color: cardBackgroundColor,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -307,12 +339,12 @@ class _MembershipScreenState extends State<MembershipScreen> {
               children: [
                 Icon(
                   Icons.payment,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: primaryColor,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '会员订阅选项',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(color: textColor),
                 ),
               ],
             ),
@@ -325,22 +357,22 @@ class _MembershipScreenState extends State<MembershipScreen> {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: isRecommended
-                      ? Theme.of(context).colorScheme.primary
+                      ? primaryColor
                       : Colors.grey.withOpacity(0.3),
                     width: isRecommended ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   color: isRecommended
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
-                    : null,
+                    ? primaryColor.withOpacity(0.05)
+                    : cardBackgroundColor,
                 ),
                 child: Stack(
                   children: [
                     if (isRecommended)
                       Positioned.fill(
                         child: Shimmer.fromColors(
-                          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                          highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                          baseColor: primaryColor.withOpacity(0.05),
+                          highlightColor: primaryColor.withOpacity(0.2),
                           period: const Duration(seconds: 3),
                           child: Container(
                             decoration: BoxDecoration(
@@ -357,16 +389,16 @@ class _MembershipScreenState extends State<MembershipScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: primaryColor,
                             borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(12),
                               bottomLeft: Radius.circular(8),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             '推荐',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: _isPro ? Colors.black : Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -383,13 +415,13 @@ class _MembershipScreenState extends State<MembershipScreen> {
                             children: [
                               Text(
                                 plan['title'] as String,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium?.copyWith(color: textColor),
                               ),
                               const Spacer(),
                               if (plan['originalPrice'] != null) ...[
                                 Text(
                                   plan['originalPrice'] as String,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: theme.textTheme.bodySmall?.copyWith(
                                     decoration: TextDecoration.lineThrough,
                                     color: Colors.grey,
                                   ),
@@ -398,14 +430,14 @@ class _MembershipScreenState extends State<MembershipScreen> {
                               ],
                               Text(
                                 plan['price'] as String,
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: primaryColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
                                 plan['period'] as String,
-                                style: Theme.of(context).textTheme.bodyMedium,
+                                style: theme.textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                               ),
                             ],
                           ),
@@ -436,12 +468,12 @@ class _MembershipScreenState extends State<MembershipScreen> {
                                   Icon(
                                     Icons.check_circle,
                                     size: 16,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: primaryColor,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     feature,
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    style: theme.textTheme.bodySmall?.copyWith(color: secondaryTextColor),
                                   ),
                                 ],
                               ),
@@ -456,11 +488,11 @@ class _MembershipScreenState extends State<MembershipScreen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isRecommended
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                                foregroundColor: isRecommended
-                                  ? Colors.white
-                                  : null,
+                                  ? primaryColor
+                                  : (_isPro ? Colors.grey.shade800 : null),
+                                foregroundColor: _isPro
+                                  ? (isRecommended ? Colors.black : Colors.white)
+                                  : (isRecommended ? Colors.white : null),
                               ),
                               child: Text('选择 ${plan['title']}'),
                             ),
@@ -481,6 +513,15 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildFAQ(BuildContext context) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700); // 金色
+
+    // 根据会员状态定义颜色
+    final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
+    final textColor = _isPro ? Colors.white : theme.textTheme.bodyLarge?.color;
+    final secondaryTextColor = _isPro ? Colors.white70 : theme.textTheme.bodyMedium?.color;
+    final primaryColor = _isPro ? proColor : theme.colorScheme.primary;
+
     final faqs = [
       {
         'question': '如何取消订阅？',
@@ -505,6 +546,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
     ];
 
     return Card(
+      color: cardBackgroundColor,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -514,27 +556,29 @@ class _MembershipScreenState extends State<MembershipScreen> {
               children: [
                 Icon(
                   Icons.help_outline,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: primaryColor,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '常见问题',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(color: textColor),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             ...faqs.map((faq) => ExpansionTile(
+              iconColor: primaryColor,
+              collapsedIconColor: primaryColor,
               title: Text(
                 faq['question'] as String,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: theme.textTheme.titleMedium?.copyWith(color: textColor),
               ),
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Text(
                     faq['answer'] as String,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: secondaryTextColor),
                   ),
                 ),
               ],
@@ -546,21 +590,43 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   void _showSubscriptionDialog(BuildContext context, String planName) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700);
+    final isPro = _isPro;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('确认订阅'),
+        backgroundColor: isPro ? Colors.grey[900] : null,
+        titleTextStyle: TextStyle(
+          color: isPro ? proColor : theme.textTheme.titleLarge?.color,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+        contentTextStyle: TextStyle(
+          color: isPro ? Colors.white : theme.textTheme.bodyLarge?.color,
+        ),
+        title: const Text('确认订阅'),
         content: Text('您确定要订阅$planName吗？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(
+              '取消',
+              style: TextStyle(
+                color: isPro ? Colors.white70 : null,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _processPayment(context, planName);
+              _showPaymentQRCode(context, planName);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isPro ? proColor : theme.colorScheme.primary,
+              foregroundColor: isPro ? Colors.black : Colors.white,
+            ),
             child: const Text('确认'),
           ),
         ],
@@ -568,12 +634,99 @@ class _MembershipScreenState extends State<MembershipScreen> {
     );
   }
 
+  void _showPaymentQRCode(BuildContext context, String planName) {
+    final theme = Theme.of(context);
+    final proColor = const Color(0xFFFFD700);
+    final isPro = _isPro;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isPro ? Colors.grey[900] : null,
+        contentPadding: const EdgeInsets.all(16),
+        title: Text(
+          '请扫码支付',
+          style: TextStyle(
+            color: isPro ? proColor : theme.colorScheme.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '订阅: $planName',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isPro ? Colors.white : null,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: isPro ? Border.all(color: proColor, width: 2) : null,
+                boxShadow: isPro ? [
+                  BoxShadow(
+                    color: proColor.withOpacity(0.2),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  )
+                ] : null,
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                'assets/images/GBC_Pay_trans.png',
+                width: 230,
+                height: 230,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '请扫描上方二维码完成支付',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: isPro ? Colors.white70 : null,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              '取消支付',
+              style: TextStyle(
+                color: isPro ? Colors.white70 : null,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _processPayment(context, planName);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isPro ? proColor : theme.colorScheme.primary,
+              foregroundColor: isPro ? Colors.black : Colors.white,
+            ),
+            child: const Text('我已支付'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _processPayment(BuildContext context, String planName) {
-    // TODO: 这里应该集成实际的支付逻辑
+    // TODO: 这里可以集成实际的支付验证逻辑
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('正在处理$planName订阅，请稍后...'),
-        duration: const Duration(seconds: 2),
+      const SnackBar(
+        content: Text('正在验证支付状态，请稍后...'),
+        duration: Duration(seconds: 2),
       ),
     );
 
