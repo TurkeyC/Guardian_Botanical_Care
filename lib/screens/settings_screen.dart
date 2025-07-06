@@ -1,77 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
-import '../themes/app_themes.dart';
-import 'apple_style_showcase_page.dart';
+import 'theme_settings_screen.dart';
+import 'service_settings_screen.dart';
+import 'membership_screen.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  // 控制器
-  final _inaturalistUrlController = TextEditingController();
-  final _inaturalistTokenController = TextEditingController();
-  final _llmApiUrlController = TextEditingController();
-  final _llmApiKeyController = TextEditingController();
-  final _llmModelController = TextEditingController();
-  final _vlmApiUrlController = TextEditingController();
-  final _vlmApiKeyController = TextEditingController();
-  final _vlmModelController = TextEditingController();
-  final _plantIdApiKeyController = TextEditingController();
-  final _weatherApiKeyController = TextEditingController();
-  final _weatherApiUrlController = TextEditingController();
-
-  String _selectedPlantApiType = 'inaturalist';
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadSettings();
-    });
-  }
-
-  void _loadSettings() async {
-    final settingsProvider = context.read<SettingsProvider>();
-    await settingsProvider.loadSettings();
-
-    setState(() {
-      _selectedPlantApiType = settingsProvider.plantIdentificationApiType;
-      _inaturalistUrlController.text = settingsProvider.inaturalistApiUrl;
-      _inaturalistTokenController.text = settingsProvider.inaturalistToken;
-      _llmApiUrlController.text = settingsProvider.llmApiUrl;
-      _llmApiKeyController.text = settingsProvider.llmApiKey;
-      _llmModelController.text = settingsProvider.llmModel;
-      _vlmApiUrlController.text = settingsProvider.vlmApiUrl;
-      _vlmApiKeyController.text = settingsProvider.vlmApiKey;
-      _vlmModelController.text = settingsProvider.vlmModel;
-      _plantIdApiKeyController.text = settingsProvider.plantIdApiKey;
-      _weatherApiKeyController.text = settingsProvider.weatherApiKey;
-      _weatherApiUrlController.text = settingsProvider.weatherApiUrl;
-    });
-  }
-
-  @override
-  void dispose() {
-    _inaturalistUrlController.dispose();
-    _inaturalistTokenController.dispose();
-    _llmApiUrlController.dispose();
-    _llmApiKeyController.dispose();
-    _llmModelController.dispose();
-    _vlmApiUrlController.dispose();
-    _vlmApiKeyController.dispose();
-    _vlmModelController.dispose();
-    _plantIdApiKeyController.dispose();
-    _weatherApiKeyController.dispose();
-    _weatherApiUrlController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,12 +14,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('设置'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            onPressed: _saveSettings,
-            icon: const Icon(Icons.save),
-          ),
-        ],
       ),
       body: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
@@ -92,471 +21,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // 皮肤选择
-                _buildThemeSection(settingsProvider),
-                const SizedBox(height: 24),
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // 应用信息卡片
+              _buildAppInfoCard(context),
+              const SizedBox(height: 16),
 
-                // 植物识别API选择
-                _buildPlantIdentificationSection(),
-                const SizedBox(height: 24),
+              // Pro会员服务卡片
+              _buildMembershipCard(context),
+              const SizedBox(height: 16),
 
-                // LLM API设置
-                _buildLLMApiSection(),
-                const SizedBox(height: 24),
+              // 应用风格选择卡片
+              _buildThemeCard(context),
+              const SizedBox(height: 16),
 
-                // VLM API设置
-                _buildVLMApiSection(),
-                const SizedBox(height: 24),
+              // 服务配置卡片
+              _buildServiceCard(context),
+              const SizedBox(height: 16),
 
-                // Weather API设置
-                _buildWeatherApiSection(),
-                const SizedBox(height: 24),
+              // 其他设置
+              _buildOtherSettingsCard(context),
 
-                // 苹果风格展示按钮
-                _buildAppleStyleShowcaseButton(),
-
-                if (settingsProvider.error != null) ...[
-                  const SizedBox(height: 16),
-                  Card(
-                    color: Colors.red[50],
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        settingsProvider.error!,
-                        style: TextStyle(color: Colors.red[700]),
-                      ),
+              if (settingsProvider.error != null) ...[
+                const SizedBox(height: 16),
+                Card(
+                  color: Colors.red[50],
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      settingsProvider.error!,
+                      style: TextStyle(color: Colors.red[700]),
                     ),
                   ),
-                ],
+                ),
               ],
-            ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildThemeSection(SettingsProvider settingsProvider) {
+  Widget _buildAppInfoCard(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.palette_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '皮肤设置',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 主题选择卡片
-            ...AppThemeType.values.map((themeType) {
-              final isSelected = settingsProvider.currentTheme == themeType;
-              return Container(
-                key: ValueKey('theme_${themeType.name}'), // 添加唯一key避免GlobalKey冲突
-                margin: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: () async {
-                    await settingsProvider.updateTheme(themeType);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.withValues(alpha: 0.3),
-                        width: isSelected ? 2 : 1,
-                      ),
-                      color: isSelected
-                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                        : Theme.of(context).colorScheme.surface,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min, // 防止布局溢出
-                      children: [
-                        // 主题预览图标
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            gradient: _getThemeGradient(themeType),
-                          ),
-                          child: Icon(
-                            _getThemeIcon(themeType),
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-
-                        // 主题信息
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min, // 防止垂直溢出
-                            children: [
-                              Text(
-                                AppThemes.getThemeName(themeType),
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                  color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : null,
-                                  inherit: true, // 确保inherit一致性
-                                ),
-                                overflow: TextOverflow.ellipsis, // 防止文本溢出
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                AppThemes.getThemeDescription(themeType),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  inherit: true, // 确保inherit一致性
-                                ),
-                                overflow: TextOverflow.ellipsis, // 防止文本溢出
-                                maxLines: 2, // 限制最大行数
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // 选中指示器
-                        if (isSelected)
-                          Icon(
-                            Icons.check_circle,
-                            color: Theme.of(context).colorScheme.primary,
-                          )
-                        else
-                          Icon(
-                            Icons.radio_button_unchecked,
-                            color: Colors.grey.withValues(alpha: 0.5),
-                          ),
-                      ],
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    // gradient: const LinearGradient(
+                    //   colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                    //   begin: Alignment.topLeft,
+                    //   end: Alignment.bottomRight,
+                    // ),
+                  ),
+                  // child: const Icon(
+                  //   Icons.local_florist,
+                  //   color: Colors.white,
+                  //   size: 30,
+                  // ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-              );
-            }).toList(), // 确保返回List而不是Iterable
-          ],
-        ),
-      ),
-    );
-  }
-
-  Gradient _getThemeGradient(AppThemeType themeType) {
-    switch (themeType) {
-      case AppThemeType.minimal:
-        return const LinearGradient(
-          colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-      case AppThemeType.dynamic:
-        return const LinearGradient(
-          colors: [Color(0xFF007AFF), Color(0xFF34C759)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        );
-    }
-  }
-
-  IconData _getThemeIcon(AppThemeType themeType) {
-    switch (themeType) {
-      case AppThemeType.minimal:
-        return Icons.minimize_outlined;
-      case AppThemeType.dynamic:
-        return Icons.auto_awesome;
-    }
-  }
-
-  Widget _buildPlantIdentificationSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '植物识别设置',
-              style: Theme.of(context).textTheme.titleLarge,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '观本草-AI绿植养护助手',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '版本 0.7.21',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-
-            // API类型选择
-            Text('识别API类型', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              '应用简介',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedPlantApiType,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: '选择植物识别API',
-              ),
-              items: const [
-                DropdownMenuItem(value: 'inaturalist', child: Text('iNaturalist')),
-                DropdownMenuItem(value: 'plantid', child: Text('Plant.id')),
-                DropdownMenuItem(value: 'vlm', child: Text('VLM (视觉语言模型)')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedPlantApiType = value!;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // 根据选择的API类型显示相应配置
-            if (_selectedPlantApiType == 'inaturalist') ..._buildINaturalistSettings(),
-            if (_selectedPlantApiType == 'plantid') ..._buildPlantIdSettings(),
-            if (_selectedPlantApiType == 'vlm')
-              Text('使用下方配置的VLM API进行植物识别',
-                style: TextStyle(color: Colors.grey[600])),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildINaturalistSettings() {
-    return [
-      TextFormField(
-        controller: _inaturalistUrlController,
-        decoration: const InputDecoration(
-          labelText: 'iNaturalist API URL',
-          border: OutlineInputBorder(),
-          hintText: 'https://api.inaturalist.org',
-        ),
-        validator: (value) => value?.isEmpty == true ? '请输入API URL' : null,
-      ),
-      const SizedBox(height: 16),
-      TextFormField(
-        controller: _inaturalistTokenController,
-        decoration: const InputDecoration(
-          labelText: 'iNaturalist Token',
-          border: OutlineInputBorder(),
-          hintText: '请输入您的iNaturalist访问令牌',
-        ),
-        validator: (value) => value?.isEmpty == true ? '请输入访问令牌' : null,
-        obscureText: true,
-      ),
-    ];
-  }
-
-  List<Widget> _buildPlantIdSettings() {
-    return [
-      TextFormField(
-        controller: _plantIdApiKeyController,
-        decoration: const InputDecoration(
-          labelText: 'Plant.id API Key',
-          border: OutlineInputBorder(),
-          hintText: '请输入您的Plant.id API密钥',
-        ),
-        validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-        obscureText: true,
-      ),
-    ];
-  }
-
-  Widget _buildLLMApiSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
             Text(
-              'LLM API设置 (文本生成)',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _llmApiUrlController,
-              decoration: const InputDecoration(
-                labelText: 'LLM API 完整地址',
-                border: OutlineInputBorder(),
-                hintText: 'https://api.openai.com/v1/chat/completions',
-                helperText: '请输入完整的API地址，包括版本号和端点路径',
+              '专业的绿植识别养护助手，基于先进的AI技术，帮助您快速识别身边的植物。支持多种识别方式，提供详细的植物信息和养护建议。',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[700],
+                height: 1.5,
               ),
-              validator: (value) => value?.isEmpty == true ? '请输入LLM API完整地址' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _llmApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'LLM API Key',
-                border: OutlineInputBorder(),
-                hintText: '请输入LLM API密钥',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _llmModelController,
-              decoration: const InputDecoration(
-                labelText: 'LLM 模型',
-                border: OutlineInputBorder(),
-                hintText: 'gpt-4',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVLMApiSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'VLM API设置 (图像理解)',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _vlmApiUrlController,
-              decoration: const InputDecoration(
-                labelText: 'VLM API 完整地址',
-                border: OutlineInputBorder(),
-                hintText: 'https://api.openai.com/v1/chat/completions',
-                helperText: '请输入完整的API地址，包括版本号和端点路径',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入VLM API完整地址' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _vlmApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'VLM API Key',
-                border: OutlineInputBorder(),
-                hintText: '请输入VLM API密钥',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _vlmModelController,
-              decoration: const InputDecoration(
-                labelText: 'VLM 模型',
-                border: OutlineInputBorder(),
-                hintText: 'gpt-4-vision-preview',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeatherApiSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Weather API设置',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _weatherApiUrlController,
-              decoration: const InputDecoration(
-                labelText: 'Weather API URL',
-                border: OutlineInputBorder(),
-                hintText: 'https://api.weatherapi.com/v1',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入Weather API URL' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _weatherApiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'Weather API Key',
-                border: OutlineInputBorder(),
-                hintText: '请输入Weather API密钥',
-              ),
-              validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppleStyleShowcaseButton() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.auto_awesome,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '风格展示',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
             ),
             const SizedBox(height: 12),
             Text(
-              '2.5D灵动风格界面，包含毛玻璃效果、渐变色块、动画效果等',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
+              '开发团队',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const AppleStyleShowcasePage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.visibility),
-                label: const Text('查看演示'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007AFF),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+            const SizedBox(height: 8),
+            Text(
+              '焚思启智开发团队 - 致力于为用户提供优质的植物识别体验',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[700],
               ),
             ),
           ],
@@ -565,49 +154,364 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _saveSettings() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final settingsProvider = context.read<SettingsProvider>();
-
-    // 保存植物识别API类型
-    await settingsProvider.updatePlantIdentificationApiType(_selectedPlantApiType);
-
-    // 保存iNaturalist设置
-    await settingsProvider.updateINaturalistSettings(
-      apiUrl: _inaturalistUrlController.text,
-      token: _inaturalistTokenController.text,
+  Widget _buildMembershipCard(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const MembershipScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.workspace_premium,
+                color: Colors.white,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '激活Pro会员服务',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      '解锁无限识别次数、高精度模型等特权',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
 
-    // 保存LLM设置
-    await settingsProvider.updateLLMSettings(
-      apiUrl: _llmApiUrlController.text,
-      apiKey: _llmApiKeyController.text,
-      model: _llmModelController.text,
+  Widget _buildThemeCard(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ThemeSettingsScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF007AFF), Color(0xFF34C759)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.palette_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '应用风格选择',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '选择简约风格或灵动风格，体验不同设计',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
 
-    // 保存VLM设置
-    await settingsProvider.updateVLMSettings(
-      apiUrl: _vlmApiUrlController.text,
-      apiKey: _vlmApiKeyController.text,
-      model: _vlmModelController.text,
+  Widget _buildServiceCard(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ServiceSettingsScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                ),
+                child: Icon(
+                  Icons.settings_applications,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '服务配置',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '植物识别、API配置等服务设置',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
 
-    // 保存Plant.id设置
-    await settingsProvider.updatePlantIdSettings(
-      apiKey: _plantIdApiKeyController.text,
+  Widget _buildOtherSettingsCard(BuildContext context) {
+    final settingsItems = [
+      {
+        'icon': Icons.info_outline,
+        'title': '关于应用',
+        'subtitle': '版本信息、隐私政策、用户协议',
+        'onTap': () => _showAboutDialog(context),
+      },
+      {
+        'icon': Icons.feedback_outlined,
+        'title': '意见反馈',
+        'subtitle': '告诉我们您的建议和问题',
+        'onTap': () => _showFeedbackDialog(context),
+      },
+      {
+        'icon': Icons.star_outline,
+        'title': '给我们评分',
+        'subtitle': '您的支持是我们前进的动力',
+        'onTap': () => _showRatingDialog(context),
+      },
+    ];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Text(
+                '其他',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ...settingsItems.map((item) => ListTile(
+              leading: Icon(
+                item['icon'] as IconData,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: Text(item['title'] as String),
+              subtitle: Text(item['subtitle'] as String),
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey,
+              ),
+              onTap: item['onTap'] as VoidCallback,
+            )).toList(),
+          ],
+        ),
+      ),
     );
+  }
 
-    // 保存Weather设置
-    await settingsProvider.updateWeatherSettings(
-      apiKey: _weatherApiKeyController.text,
-      apiUrl: _weatherApiUrlController.text,
+  void _showAboutDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: '观本草 GBC',
+      applicationVersion: 'version: 0.7.21',
+      applicationIcon: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          // gradient: const LinearGradient(
+          //   colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+          //   begin: Alignment.topLeft,
+          //   end: Alignment.bottomRight,
+          // ),
+        ),
+        // child: const Icon(
+        //   Icons.local_florist,
+        //   color: Colors.white,
+        //   size: 30,
+        // ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+      children: [
+        const Text('基于AI的专业绿植识别养护助手'),
+        const SizedBox(height: 16),
+        const Text('© 2025 焚思启智开发团队'),
+      ],
     );
+  }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('设置已保存')),
-      );
-    }
+  void _showFeedbackDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('意见反馈'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: '请输入您的意见或建议...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('感谢您的反馈！')),
+              );
+            },
+            child: const Text('提交'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRatingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('给我们评分'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('您觉得这个应用怎么样？'),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.star, color: Colors.amber, size: 32),
+                Icon(Icons.star, color: Colors.amber, size: 32),
+                Icon(Icons.star, color: Colors.amber, size: 32),
+                Icon(Icons.star, color: Colors.amber, size: 32),
+                Icon(Icons.star, color: Colors.amber, size: 32),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('稍后'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('感谢您的评分！')),
+              );
+            },
+            child: const Text('满分!'),
+          ),
+        ],
+      ),
+    );
   }
 }
