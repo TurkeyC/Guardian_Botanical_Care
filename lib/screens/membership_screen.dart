@@ -18,7 +18,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
 
     // 根据会员状态定义颜色
     final screenBackgroundColor = _isPro ? Colors.black : theme.scaffoldBackgroundColor;
-    final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
+    // final cardBackgroundColor = _isPro ? Colors.grey[900] : null;
     final textColor = _isPro ? Colors.white : theme.textTheme.bodyLarge?.color;
     final appBarBackgroundColor = _isPro ? Colors.grey[900] : theme.colorScheme.inversePrimary;
 

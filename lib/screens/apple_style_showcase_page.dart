@@ -36,7 +36,7 @@ class _AppleStyleShowcasePageState extends State<AppleStyleShowcasePage>
     return Scaffold(
       // 毛玻璃AppBar
       appBar: const GlassAppBar(
-        title: '苹果灵动风格',
+        title: '灵动风格',
       ),
 
       // 粒子动画背景
@@ -231,7 +231,7 @@ class _AppleStyleShowcasePageState extends State<AppleStyleShowcasePage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '半透明背景配合模糊效果，营造出苹果风格的层次感',
+                  '半透明背景配合模糊效果，营造出风格的层次感',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.black.withOpacity(0.6),

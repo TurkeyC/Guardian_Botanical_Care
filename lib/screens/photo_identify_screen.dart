@@ -239,7 +239,7 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
             animationType: AnimationType.slideLeft,
             duration: const Duration(milliseconds: 1200),
             child: DynamicButton(
-              text: '📷 拍照识别',
+              text: '拍照识别',
               onPressed: () => _pickImage(ImageSource.camera),
               gradientColors: AppThemes.appleBlueGradient,
               height: 56,
@@ -255,7 +255,7 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
             animationType: AnimationType.slideLeft,
             duration: const Duration(milliseconds: 1400),
             child: DynamicButton(
-              text: '🖼️ 选择相册',
+              text: '选择相册',
               onPressed: () => _pickImage(ImageSource.gallery),
               gradientColors: AppThemes.appleGreenGradient,
               height: 56,
