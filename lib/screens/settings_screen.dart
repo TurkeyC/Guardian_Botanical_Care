@@ -413,7 +413,7 @@ class SettingsScreen extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const VideoPlayerScreen(
-                videoPath: 'assets/images/GBC_OP_6MB.mp4',
+                videoPath: 'assets/images/GBC_OP_4MB.mp4',
                 title: '了解我们',
               ),
             ),
