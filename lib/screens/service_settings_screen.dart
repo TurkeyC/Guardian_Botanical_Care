@@ -71,6 +71,8 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
     super.dispose();
   }
 
+  // TODO: 需要修复难以复制粘贴的问题
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,7 +209,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
           hintText: '请输入您的iNaturalist访问令牌',
         ),
         validator: (value) => value?.isEmpty == true ? '请输入访问令牌' : null,
-        obscureText: true,
+        obscureText: false,
         enableInteractiveSelection: true,
       ),
     ];
@@ -223,7 +225,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
           hintText: '请输入您的Plant.id API密钥',
         ),
         validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-        obscureText: true,
+        obscureText: false,
         enableInteractiveSelection: true,
       ),
     ];
@@ -269,7 +271,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
                 hintText: '请输入LLM API密钥',
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
+              obscureText: false,
               enableInteractiveSelection: true,
             ),
             const SizedBox(height: 16),
@@ -328,7 +330,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
                 hintText: '请输入VLM API密钥',
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
+              obscureText: false,
               enableInteractiveSelection: true,
             ),
             const SizedBox(height: 16),
@@ -386,7 +388,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
                 hintText: '请输入Weather API密钥',
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
-              obscureText: true,
+              obscureText: false,
               enableInteractiveSelection: true,
             ),
           ],
