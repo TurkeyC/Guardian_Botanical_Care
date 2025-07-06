@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../services/settings_service.dart';
 import '../themes/app_themes.dart';
+import 'package:dio/dio.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final SettingsService _settingsService = SettingsService();
+  final Dio _dio = Dio();
 
   // 植物识别API类型
   String _plantIdentificationApiType = 'inaturalist';
@@ -222,5 +224,160 @@ class SettingsProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// 验证LLM API可用性
+  Future<Map<String, dynamic>> testLLMApi({
+    String? apiUrl,
+    String? apiKey,
+    String? model,
+  }) async {
+    final testUrl = apiUrl ?? _llmApiUrl;
+    final testKey = apiKey ?? _llmApiKey;
+    final testModel = model ?? _llmModel;
+
+    if (testUrl.isEmpty || testKey.isEmpty || testModel.isEmpty) {
+      return {
+        'success': false,
+        'message': '请填写完整的LLM API配置信息',
+      };
+    }
+
+    try {
+      final response = await _dio.post(
+        testUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $testKey',
+            'Content-Type': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+        data: {
+          'model': testModel,
+          'messages': [
+            {
+              'role': 'user',
+              'content': 'Hello, this is a test message.',
+            },
+          ],
+          'max_tokens': 10,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'LLM API连接成功',
+          'response': response.data,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'API返回错误: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'LLM API测试失败: ';
+      if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage += '连接超时';
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMessage += '接收超时';
+      } else if (e.response != null) {
+        errorMessage += '状态码: ${e.response!.statusCode}, ${e.response!.data}';
+      } else {
+        errorMessage += e.message ?? '未知错误';
+      }
+      return {
+        'success': false,
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'LLM API测试失败: $e',
+      };
+    }
+  }
+
+  /// 验证VLM API可用性
+  Future<Map<String, dynamic>> testVLMApi({
+    String? apiUrl,
+    String? apiKey,
+    String? model,
+  }) async {
+    final testUrl = apiUrl ?? _vlmApiUrl;
+    final testKey = apiKey ?? _vlmApiKey;
+    final testModel = model ?? _vlmModel;
+
+    if (testUrl.isEmpty || testKey.isEmpty || testModel.isEmpty) {
+      return {
+        'success': false,
+        'message': '请填写完整的VLM API配置信息',
+      };
+    }
+
+    try {
+      final response = await _dio.post(
+        testUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $testKey',
+            'Content-Type': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+        data: {
+          'model': testModel,
+          'messages': [
+            {
+              'role': 'user',
+              'content': [
+                {
+                  'type': 'text',
+                  'text': 'This is a test message for vision model.',
+                },
+              ],
+            },
+          ],
+          'max_tokens': 10,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'VLM API连接成功',
+          'response': response.data,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'API返回错误: ${response.statusCode}',
+        };
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'VLM API测试失败: ';
+      if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage += '连接超时';
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMessage += '接收超时';
+      } else if (e.response != null) {
+        errorMessage += '状态码: ${e.response!.statusCode}, ${e.response!.data}';
+      } else {
+        errorMessage += e.message ?? '未知错误';
+      }
+      return {
+        'success': false,
+        'message': errorMessage,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'VLM API测试失败: $e',
+      };
+    }
   }
 }

@@ -27,6 +27,10 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
 
   String _selectedPlantApiType = 'inaturalist';
 
+  // 添加测试状态跟踪
+  bool _isTestingLLM = false;
+  bool _isTestingVLM = false;
+
   @override
   void initState() {
     super.initState();
@@ -72,7 +76,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
   }
 
   // TODO: 需要修复难以复制粘贴的问题
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -284,6 +288,25 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
               ),
               validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
             ),
+            const SizedBox(height: 16),
+            // 添加测试按钮
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isTestingLLM ? null : _testLLMApi,
+                icon: _isTestingLLM
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.wifi_protected_setup),
+                label: Text(_isTestingLLM ? '测试中...' : '测试LLM API连接'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -342,6 +365,25 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
                 hintText: 'gpt-4-vision-preview',
               ),
               validator: (value) => value?.isEmpty == true ? '请输入模型名称' : null,
+            ),
+            const SizedBox(height: 16),
+            // 添加测试按钮
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isTestingVLM ? null : _testVLMApi,
+                icon: _isTestingVLM
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.wifi_protected_setup),
+                label: Text(_isTestingVLM ? '测试中...' : '测试VLM API连接'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ),
           ],
         ),
@@ -441,5 +483,108 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
         const SnackBar(content: Text('设置已保存')),
       );
     }
+  }
+
+  // 添加测试LLM API的方法
+  Future<void> _testLLMApi() async {
+    setState(() {
+      _isTestingLLM = true;
+    });
+
+    try {
+      final settingsProvider = context.read<SettingsProvider>();
+      final result = await settingsProvider.testLLMApi(
+        apiUrl: _llmApiUrlController.text,
+        apiKey: _llmApiKeyController.text,
+        model: _llmModelController.text,
+      );
+
+      if (mounted) {
+        _showTestResult('LLM API测试结果', result);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTestingLLM = false;
+        });
+      }
+    }
+  }
+
+  // 添加测试VLM API的方法
+  Future<void> _testVLMApi() async {
+    setState(() {
+      _isTestingVLM = true;
+    });
+
+    try {
+      final settingsProvider = context.read<SettingsProvider>();
+      final result = await settingsProvider.testVLMApi(
+        apiUrl: _vlmApiUrlController.text,
+        apiKey: _vlmApiKeyController.text,
+        model: _vlmModelController.text,
+      );
+
+      if (mounted) {
+        _showTestResult('VLM API测试结果', result);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTestingVLM = false;
+        });
+      }
+    }
+  }
+
+  // 显示测试结果的方法
+  void _showTestResult(String title, Map<String, dynamic> result) {
+    final bool success = result['success'] ?? false;
+    final String message = result['message'] ?? '未知错误';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              success ? Icons.check_circle : Icons.error,
+              color: success ? Colors.green : Colors.red,
+            ),
+            const SizedBox(width: 8),
+            Text(title),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message),
+            if (success && result['response'] != null) ...[
+              const SizedBox(height: 16),
+              const Text('API响应:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  result['response'].toString(),
+                  style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
   }
 }
