@@ -4,6 +4,7 @@ import '../providers/settings_provider.dart';
 import 'theme_settings_screen.dart';
 import 'service_settings_screen.dart';
 import 'membership_screen.dart';
+import 'video_player_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -42,6 +43,10 @@ class SettingsScreen extends StatelessWidget {
 
               // 其他设置
               _buildOtherSettingsCard(context),
+              const SizedBox(height: 16),
+
+              // 了解我们卡片
+              _buildAboutUsCard(context),
 
               if (settingsProvider.error != null) ...[
                 const SizedBox(height: 16),
@@ -396,6 +401,73 @@ class SettingsScreen extends StatelessWidget {
               onTap: item['onTap'] as VoidCallback,
             )).toList(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutUsCard(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const VideoPlayerScreen(
+                videoPath: 'assets/images/GBC_OP_6MB.mp4',
+                title: '了解我们',
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF6C63FF), Color(0xFF9C88FF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.video_library,
+                color: Colors.white,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '了解我们',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      '观看宣传片，了解我们的使命与愿景',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.play_circle_outline,
+                color: Colors.white,
+                size: 24,
+              ),
+            ],
+          ),
         ),
       ),
     );
