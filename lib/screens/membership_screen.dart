@@ -63,8 +63,12 @@ class _MembershipScreenState extends State<MembershipScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 Text(
-                  '切换Pro会员状态(但是其实我一个会员功能都没做)',
+                  '切换Pro会员状态',
                   style: TextStyle(color: Colors.black54),
+                ),
+                Text(
+                  '(但是其实我一个会员功能都没做)',
+                  style: TextStyle(color: Colors.red, fontSize: 12),
                 ),
               ],
             ),
@@ -565,7 +569,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   void _processPayment(BuildContext context, String planName) {
-    // 这里应该集成实际的支付逻辑
+    // TODO: 这里应该集成实际的支付逻辑
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('正在处理$planName订阅，请稍后...'),
