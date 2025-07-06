@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../themes/app_themes.dart';
+import 'apple_style_showcase_page.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -114,6 +115,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 // Weather API设置
                 _buildWeatherApiSection(),
+                const SizedBox(height: 24),
+
+                // 苹果风格展示按钮
+                _buildAppleStyleShowcaseButton(),
 
                 if (settingsProvider.error != null) ...[
                   const SizedBox(height: 16),
@@ -425,7 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'VLM API设置 (图像理解)',
+              'VLM API设置 (���像理解)',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -497,6 +502,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
               obscureText: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppleStyleShowcaseButton() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.auto_awesome,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '苹果风格展示',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '体验全新的苹果2.5D灵动风格界面，包含毛玻璃效果、渐变色块、动画效果等',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AppleStyleShowcasePage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.visibility),
+                label: const Text('查看演示'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007AFF),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
             ),
           ],
         ),

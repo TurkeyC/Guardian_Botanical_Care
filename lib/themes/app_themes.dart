@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 enum AppThemeType {
   minimal, // 简约风格
@@ -6,6 +7,31 @@ enum AppThemeType {
 }
 
 class AppThemes {
+  // 苹果风格渐变色定义
+  static const List<Color> appleBlueGradient = [
+    Color(0xFF007AFF),
+    Color(0xFF5856D6),
+  ];
+
+  static const List<Color> appleGreenGradient = [
+    Color(0xFF34C759),
+    Color(0xFF30B057),
+  ];
+
+  static const List<Color> appleOrangeGradient = [
+    Color(0xFFFF9500),
+    Color(0xFFFF6B35),
+  ];
+
+  static const List<Color> applePurpleGradient = [
+    Color(0xFFAF52DE),
+    Color(0xFF5856D6),
+  ];
+
+  // 毛玻璃背景色定义
+  static const Color glassBackground = Color(0xF0F2F2F7);
+  static const Color darkGlassBackground = Color(0xE6000000);
+
   // 简约风格主题
   static ThemeData get minimalTheme {
     return ThemeData(
@@ -34,7 +60,7 @@ class AppThemes {
     );
   }
 
-  // 灵动风格主题 - 苹果2.5D扁平灵动风格
+  // 灵动风格主题 - 苹果2.5D灵动风格
   static ThemeData get dynamicTheme {
     const primaryColor = Color(0xFF007AFF); // 苹果蓝
     const secondaryColor = Color(0xFF34C759); // 苹果绿
@@ -227,7 +253,7 @@ class AppThemes {
       case AppThemeType.minimal:
         return '简洁清爽的设计风格';
       case AppThemeType.dynamic:
-        return '苹果风格的2.5D扁平灵动设计';
+        return '苹果风格的2.5D灵动设计';
     }
   }
 }
