@@ -208,6 +208,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
         ),
         validator: (value) => value?.isEmpty == true ? '请输入访问令牌' : null,
         obscureText: true,
+        enableInteractiveSelection: true,
       ),
     ];
   }
@@ -223,6 +224,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
         ),
         validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
         obscureText: true,
+        enableInteractiveSelection: true,
       ),
     ];
   }
@@ -268,6 +270,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
               obscureText: true,
+              enableInteractiveSelection: true,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -326,6 +329,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
               obscureText: true,
+              enableInteractiveSelection: true,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -383,6 +387,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
               ),
               validator: (value) => value?.isEmpty == true ? '请输入API密钥' : null,
               obscureText: true,
+              enableInteractiveSelection: true,
             ),
           ],
         ),
