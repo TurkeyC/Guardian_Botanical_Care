@@ -42,14 +42,6 @@ class DiagnosisScreen extends StatelessWidget {
 
             // 功能卡片
             _buildFeatureCard(
-              icon: Icons.psychology,
-              title: 'AI深度诊断',
-              description: '更精准的植物健康分析',
-              color: Colors.purple,
-              onTap: () => _showComingSoonDialog(context, 'AI深度诊断'),
-            ),
-            const SizedBox(height: 16),
-            _buildFeatureCard(
               icon: Icons.group,
               title: '社区问答',
               description: '与其他植物爱好者交流经验',
@@ -58,11 +50,21 @@ class DiagnosisScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildFeatureCard(
+              icon: Icons.psychology,
+              title: 'AI深度诊断',
+              description: '更精准的植物健康分析',
+              color: Colors.purple,
+              isPro: true, // 会员功能
+              onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
+            ),
+            const SizedBox(height: 16),
+            _buildFeatureCard(
               icon: Icons.person_outline,
               title: '专家咨询',
               description: '预约专业园艺师一对一指导',
               color: Colors.orange,
-              onTap: () => _showComingSoonDialog(context, '专家咨询'),
+              isPro: true, // 会员功能
+              onTap: () => _showOnlyForPro(context, '专家咨询'),
             ),
           ],
         ),
@@ -76,6 +78,7 @@ class DiagnosisScreen extends StatelessWidget {
     required String description,
     required Color color,
     required VoidCallback onTap,
+    bool isPro = false,
   }) {
     return Card(
       child: InkWell(
@@ -99,16 +102,42 @@ class DiagnosisScreen extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      if (isPro) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF1A1A1A), Color(0xFFD4AF37)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Pro',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                     const SizedBox(height: 4),
                     Text(
                       description,
@@ -138,6 +167,22 @@ class DiagnosisScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text(feature),
         content: const Text('该功能正在开发中，敬请期待！'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOnlyForPro(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(feature),
+        content: const Text('该功能属于Pro会员专属功能！'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
