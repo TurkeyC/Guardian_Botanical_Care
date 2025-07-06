@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
-class MembershipScreen extends StatelessWidget {
+class MembershipScreen extends StatefulWidget {
   const MembershipScreen({super.key});
+
+  @override
+  State<MembershipScreen> createState() => _MembershipScreenState();
+}
+
+class _MembershipScreenState extends State<MembershipScreen> {
+  bool _isPro = false; // 默认非会员
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,45 @@ class MembershipScreen extends StatelessWidget {
 
             // 常见问题
             _buildFAQ(context),
+
+            // 调试开关
+            const SizedBox(height: 32),
+            _buildDebugSwitch(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDebugSwitch() {
+    return Card(
+      color: Colors.yellow.shade100,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '开发调试选项',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                Text(
+                  '切换Pro会员状态(但是其实我一个会员功能都没做)',
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+            Switch(
+              value: _isPro,
+              onChanged: (value) {
+                setState(() {
+                  _isPro = value;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -36,8 +83,57 @@ class MembershipScreen extends StatelessWidget {
   }
 
   Widget _buildMembershipStatus(BuildContext context) {
-    // 这里可以根据实际的会员状态来显示不同内容
-    bool isPro = false; // 临时状态，实际应该从数据源获取
+    // TODO: 会员判断逻辑: 这里可以根据实际的会员状态来显示不同内容
+    // bool isPro = true; // 临时状态，实际应该从数据源获取
+
+    Widget cardContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              _isPro ? Icons.workspace_premium : Icons.person_outline,
+              color: Colors.white,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _isPro ? 'Pro会员' : '免费用户',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    _isPro ? '感谢您的支持！' : '升级Pro享受更多功能',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (_isPro) ...[
+          // TODO: 具体会员逻辑待开发
+          const SizedBox(height: 16),
+          const Text(
+            '到期时间: 2024年12月31日',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ],
+    );
 
     return Card(
       child: Container(
@@ -45,66 +141,25 @@ class MembershipScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          gradient: isPro
-            ? const LinearGradient(
-                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          gradient: _isPro
+              ? const LinearGradient(
+                  colors: [Color(0xFF2C2C2C), Color(0xFF1B1B1B)], // 深色背景
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFF6C7CE7), Color(0xFF4FACFE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+        ),
+        child: _isPro
+            ? Shimmer.fromColors(
+                baseColor: const Color(0xFFFFD700),
+                highlightColor: const Color(0xFFFFFDE4),
+                child: cardContent,
               )
-            : const LinearGradient(
-                colors: [Color(0xFF6C7CE7), Color(0xFF4FACFE)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isPro ? Icons.workspace_premium : Icons.person_outline,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isPro ? 'Pro会员' : '免费用户',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        isPro ? '感谢您的支持！' : '升级Pro享受更多功能',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (isPro) ...[
-              // TODO: 具体会员逻辑待开发
-              const SizedBox(height: 16),
-              const Text(
-                '到期时间: 2024年12月31日',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ],
-        ),
+            : cardContent,
       ),
     );
   }
@@ -252,7 +307,7 @@ class MembershipScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '订阅选项',
+                  '会员订阅选项',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -260,22 +315,37 @@ class MembershipScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ...plans.map((plan) {
               final isRecommended = plan['isRecommended'] == true;
-              return Container(
+
+              Widget planCard = Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: isRecommended
                       ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.withValues(alpha: 0.3),
+                      : Colors.grey.withOpacity(0.3),
                     width: isRecommended ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   color: isRecommended
-                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.05)
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
                     : null,
                 ),
                 child: Stack(
                   children: [
+                    if (isRecommended)
+                      Positioned.fill(
+                        child: Shimmer.fromColors(
+                          baseColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                          highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                          period: const Duration(seconds: 3),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white, // Shimmer needs a color to draw on
+                            ),
+                          ),
+                        ),
+                      ),
                     if (isRecommended)
                       Positioned(
                         top: 0,
@@ -397,6 +467,8 @@ class MembershipScreen extends StatelessWidget {
                   ],
                 ),
               );
+
+              return planCard;
             }).toList(),
           ],
         ),
@@ -416,7 +488,7 @@ class MembershipScreen extends StatelessWidget {
       },
       {
         'question': '支持哪些支付方式？',
-        'answer': '暂时仅支持扫码支付，后续将会支持微信支付、支付宝、银行卡等多种支付方式。',
+        'answer': '暂时仅支持二维码支付，后续将会支持微信支付、支付宝、银行卡等多种支付方式。',
       },
       {
         'question': '数据安全有保障吗？',
@@ -510,6 +582,9 @@ class MembershipScreen extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
         );
+        setState(() {
+          _isPro = true;
+        });
       }
     });
   }
