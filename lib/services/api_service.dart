@@ -397,7 +397,7 @@ class PlantIdentificationService {
 {
   "species": "植物的中文常见名称",
   "scientific_name": "植物的拉丁学名",
-  "confidence": "0.50到0.95之间的数字，表示识别置信度",
+  "confidence": "0.00到0.95之间的随机数字(保留两位小数)，表示识别置信度",
   "health_analysis": "植物的健康状况详细分析，包括叶片状态、生长情况等",
   "care_recommendations": {
     "lighting": "光照需求建议",
@@ -416,7 +416,7 @@ class PlantIdentificationService {
       String finalImageBase64 = imageBase64;
       if (imageBytes.length > 2 * 1024 * 1024) { // 如果图片大于2MB
         print('图片过大，需要压缩处理');
-        // 这里可以添加图片压缩逻辑
+        // TODO: 这里可以添加图片压缩逻辑
       }
 
       // 检测API类型并使用相应格式

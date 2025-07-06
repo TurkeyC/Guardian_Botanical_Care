@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../providers/plant_provider.dart';
 import '../providers/settings_provider.dart';
+import '../themes/app_themes.dart';
+import '../widgets/apple_style_widgets.dart';
+import '../widgets/apple_animations.dart';
 import '../services/api_service.dart';
 import '../services/location_service.dart';
 import '../models/plant.dart';
@@ -91,44 +93,492 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('养护提醒'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            onPressed: _loadWeatherInfo,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: Consumer<PlantProvider>(
-        builder: (context, plantProvider, child) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              await _loadWeatherInfo();
-              await plantProvider.loadPlants();
-            },
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // 天气信息卡片
-                _buildWeatherCard(),
-                const SizedBox(height: 16),
+    final settingsProvider = context.watch<SettingsProvider>();
+    final isDynamicTheme = settingsProvider.currentTheme == AppThemeType.dynamic;
 
-                // 植物养护提醒列表
-                if (plantProvider.plants.isEmpty)
-                  _buildEmptyState()
-                else
-                  ..._buildPlantReminders(plantProvider.plants),
+    return Scaffold(
+      appBar: isDynamicTheme
+          ? const GlassAppBar(title: '养护提醒')
+          : AppBar(
+              title: const Text('养护提醒'),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              actions: [
+                IconButton(
+                  onPressed: _loadWeatherInfo,
+                  icon: const Icon(Icons.refresh),
+                ),
               ],
             ),
-          );
-        },
+      body: isDynamicTheme
+          ? ParticleBackground(child: _buildDynamicBody())
+          : _buildMinimalBody(),
+    );
+  }
+
+  Widget _buildDynamicBody() {
+    return Consumer<PlantProvider>(
+      builder: (context, plantProvider, child) {
+        return RefreshIndicator(
+          onRefresh: () async {
+            await _loadWeatherInfo();
+            await plantProvider.loadPlants();
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // 天气信息卡片 - 苹果风格
+              AnimatedContainer2D(
+                animationType: AnimationType.slideUp,
+                duration: const Duration(milliseconds: 800),
+                child: _buildDynamicWeatherCard(),
+              ),
+              const SizedBox(height: 24),
+
+              // 植物养护提醒列表
+              if (plantProvider.plants.isEmpty)
+                _buildDynamicEmptyState()
+              else
+                ..._buildDynamicPlantReminders(plantProvider.plants),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMinimalBody() {
+    return Consumer<PlantProvider>(
+      builder: (context, plantProvider, child) {
+        return RefreshIndicator(
+          onRefresh: () async {
+            await _loadWeatherInfo();
+            await plantProvider.loadPlants();
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // 天气信息卡片
+              _buildWeatherCard(),
+              const SizedBox(height: 16),
+
+              // 植物养护提醒列表
+              if (plantProvider.plants.isEmpty)
+                _buildEmptyState()
+              else
+                ..._buildPlantReminders(plantProvider.plants),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDynamicWeatherCard() {
+    return GradientCard(
+      gradientColors: AppThemes.appleBlueGradient,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.wb_sunny_rounded, color: Colors.white, size: 28),
+              SizedBox(width: 12),
+              Text(
+                '今日天气',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          if (_isLoadingWeather)
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            )
+          else if (_weatherError != null)
+            GlassContainer(
+              backgroundColor: Colors.red.withOpacity(0.1),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _weatherError!,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else if (_weatherInfo != null)
+            _buildDynamicWeatherContent()
+          else
+            const Text(
+              '暂无天气信息',
+              style: TextStyle(color: Colors.white70),
+            ),
+        ],
       ),
     );
   }
 
+  Widget _buildDynamicWeatherContent() {
+    final weather = _weatherInfo!;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            // 温度和天气状况
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${weather.current.tempC.round()}°C',
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    weather.current.condition.text,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '体感 ${weather.current.feelslikeC.round()}°C',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 天气图标
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                _getWeatherIcon(weather.current.condition.text),
+                size: 40,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 20),
+
+        // 详细信息 - 毛玻璃卡片
+        GlassContainer(
+          backgroundColor: Colors.white.withOpacity(0.15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildDynamicWeatherDetail(
+                icon: Icons.opacity_rounded,
+                label: '湿度',
+                value: '${weather.current.humidity}',
+              ),
+              _buildDynamicWeatherDetail(
+                icon: Icons.air_rounded,
+                label: '风速',
+                value: '${weather.current.windKph.round()}',
+              ),
+              _buildDynamicWeatherDetail(
+                icon: Icons.wb_sunny_outlined,
+                label: 'UV',
+                value: weather.current.uv.round().toString(),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+        _buildDynamicWeatherAdvice(weather),
+      ],
+    );
+  }
+
+  Widget _buildDynamicWeatherDetail({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 24, color: Colors.white),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white70,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDynamicWeatherAdvice(WeatherInfo weather) {
+    String advice = '';
+    List<Color> adviceColors = AppThemes.appleGreenGradient;
+    IconData adviceIcon = Icons.check_circle_outline_rounded;
+
+    if (weather.current.tempC > 30) {
+      advice = '高温天气，注意遮阴增湿';
+      adviceColors = [const Color(0xFFFF3B30), const Color(0xFFFF6B35)];
+      adviceIcon = Icons.warning_amber_rounded;
+    } else if (weather.current.tempC < 10) {
+      advice = '低温天气，注意保温';
+      adviceColors = AppThemes.appleBlueGradient;
+      adviceIcon = Icons.ac_unit_rounded;
+    } else if (weather.current.humidity < 30) {
+      advice = '空气干燥，增加湿度';
+      adviceColors = AppThemes.appleOrangeGradient;
+      adviceIcon = Icons.opacity_rounded;
+    } else {
+      advice = '天气条件良好';
+      adviceColors = AppThemes.appleGreenGradient;
+      adviceIcon = Icons.check_circle_outline_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: adviceColors),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: adviceColors.first.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(adviceIcon, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              advice,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDynamicEmptyState() {
+    return AnimatedContainer2D(
+      animationType: AnimationType.combined,
+      child: GlassContainer(
+        child: Column(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: AppThemes.applePurpleGradient,
+                ),
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '暂无养护提醒',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1C1C1E),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '添加植物后，这里将会显示个性化的养护建议',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildDynamicPlantReminders(List<Plant> plants) {
+    return plants.asMap().entries.map((entry) {
+      final index = entry.key;
+      final plant = entry.value;
+
+      return AnimatedContainer2D(
+        animationType: AnimationType.slideUp,
+        duration: Duration(milliseconds: 1000 + (index * 100)),
+        child: FloatingCard(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            children: [
+              // 植物图片
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: AppThemes.appleGreenGradient,
+                  ),
+                ),
+                padding: const EdgeInsets.all(2),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: plant.imagePath.isNotEmpty
+                      ? Image.file(
+                          File(plant.imagePath),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.eco_rounded, color: Colors.white),
+                        )
+                      : const Icon(Icons.eco_rounded, color: Colors.white),
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // 植物信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plant.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1C1C1E),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '健康状态: ${plant.healthStatus}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF8E8E93),
+                      ),
+                    ),
+                    if (plant.wateringFrequency.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '浇水提醒: ${_parseSimpleText(plant.wateringFrequency)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFAEAEB2),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // 提醒按钮
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: AppThemes.appleOrangeGradient,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    // TODO: 设置提醒逻辑
+                  },
+                  icon: const Icon(
+                    Icons.notifications_active_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  /// 简单文本解析，支持解析带有换行的文本和JSON格式
+  String _parseSimpleText(String content) {
+    try {
+      // 尝试解析JSON，提取具体的值
+      final jsonData = jsonDecode(content);
+      if (jsonData is Map<String, dynamic>) {
+        // 如果是JSON对象，尝试提取有用的信息
+        if (jsonData.containsKey('watering')) {
+          return jsonData['watering'].toString();
+        } else if (jsonData.containsKey('lighting')) {
+          return jsonData['lighting'].toString();
+        } else if (jsonData.containsKey('fertilization')) {
+          return jsonData['fertilization'].toString();
+        } else {
+          // 如果找不到特定字段，返回第一个值
+          return jsonData.values.first.toString();
+        }
+      }
+    } catch (e) {
+      // JSON解析失败，按照普通文本处理
+    }
+
+    // 普通文本处理：替换换行符为逗号并去除多余的空格
+    return content.replaceAll('\n', ', ').replaceAll(RegExp(r',\s*'), ', ').trim();
+  }
+
+  // 简约主题的原始方法
   Widget _buildWeatherCard() {
     return Card(
       elevation: 4,
@@ -179,18 +629,14 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
                 ),
               )
             else if (_weatherInfo != null)
-              _buildWeatherContent()
-            else
-              const Text('暂无天气信息'),
+              _buildWeatherInfo(_weatherInfo!),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWeatherContent() {
-    final weather = _weatherInfo!;
-
+  Widget _buildWeatherInfo(WeatherInfo weather) {
     return Column(
       children: [
         Row(
@@ -272,16 +718,16 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
               _buildWeatherDetail(
                 icon: Icons.opacity,
                 label: '湿度',
-                value: '${weather.current.humidity}%',
+                value: '${weather.current.humidity}',
               ),
               _buildWeatherDetail(
                 icon: Icons.air,
                 label: '风速',
-                value: '${weather.current.windKph.round()} km/h',
+                value: '${weather.current.windKph.round()}',
               ),
               _buildWeatherDetail(
                 icon: Icons.wb_sunny_outlined,
-                label: 'UV指数',
+                label: 'UV',
                 value: weather.current.uv.round().toString(),
               ),
             ],
@@ -447,31 +893,5 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
         ),
       ),
     )).toList();
-  }
-
-  /// 简单文本解析，支持解析带有换行的文本和JSON格式
-  String _parseSimpleText(String content) {
-    try {
-      // 尝试解析JSON，提取具体的值
-      final jsonData = jsonDecode(content);
-      if (jsonData is Map<String, dynamic>) {
-        // 如果是JSON对象，尝试提取有用的信息
-        if (jsonData.containsKey('watering')) {
-          return jsonData['watering'].toString();
-        } else if (jsonData.containsKey('lighting')) {
-          return jsonData['lighting'].toString();
-        } else if (jsonData.containsKey('fertilization')) {
-          return jsonData['fertilization'].toString();
-        } else {
-          // 如果找不到特定字段，返回第一个值
-          return jsonData.values.first.toString();
-        }
-      }
-    } catch (e) {
-      // JSON解析失败，按照普通文本处理
-    }
-
-    // 普通文本处理：替换换行符为逗号并去除多余空格
-    return content.replaceAll('\n', ', ').replaceAll(RegExp(r',\s*'), ', ').trim();
   }
 }

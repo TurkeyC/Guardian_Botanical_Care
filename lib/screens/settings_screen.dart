@@ -430,7 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'VLM API设置 (���像理解)',
+              'VLM API设置 (图像理解)',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -524,14 +524,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '苹果风格展示',
+                  '风格展示',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
-              '体验全新的苹果2.5D灵动风格界面，包含毛玻璃效果、渐变色块、动画效果等',
+              '2.5D灵动风格界面，包含毛玻璃效果、渐变色块、动画效果等',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
               ),

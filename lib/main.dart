@@ -9,6 +9,7 @@ import 'services/api_service.dart';
 import 'providers/plant_provider.dart';
 import 'providers/settings_provider.dart';
 import 'themes/app_themes.dart';
+import 'widgets/apple_style_widgets.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,42 +73,76 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = context.watch<SettingsProvider>();
+    final isDynamicTheme = settingsProvider.currentTheme == AppThemeType.dynamic;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.eco),
-            label: '我的植物',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: '养护提醒',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: '拍照识别',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services),
-            label: '专业诊断',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '应用设置',
-          ),
-        ],
-      ),
+      bottomNavigationBar: isDynamicTheme
+          ? GlassBottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.eco_rounded),
+                  label: '我的植物',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications_rounded),
+                  label: '养护提醒',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.camera_alt_rounded),
+                  label: '拍照识别',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.medical_services_rounded),
+                  label: '专业诊断',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings_rounded),
+                  label: '应用设置',
+                ),
+              ],
+            )
+          : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.eco),
+                  label: '我的植物',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications),
+                  label: '养护提醒',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.camera_alt),
+                  label: '拍照识别',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.medical_services),
+                  label: '专业诊断',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: '应用设置',
+                ),
+              ],
+            ),
     );
   }
 }
