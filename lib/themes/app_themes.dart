@@ -39,7 +39,6 @@ class AppThemes {
     const primaryColor = Color(0xFF007AFF); // 苹果蓝
     const secondaryColor = Color(0xFF34C759); // 苹果绿
     const surfaceColor = Color(0xFFF2F2F7); // 苹果浅灰
-    const backgroundColor = Color(0xFFFFFFFF);
 
     return ThemeData(
       useMaterial3: true,
