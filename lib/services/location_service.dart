@@ -1,41 +1,61 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LocationService {
   /// 获取当前位置
   Future<Position?> getCurrentLocation() async {
     try {
+      // 首先使用permission_handler检查和请求权限
+      await _requestLocationPermissions();
+
       // 检查位置服务是否启用
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print('位置服务未启用');
-        return null;
+        throw Exception('位置服务未启用，请在设置中开启位置服务');
       }
 
-      // 检查权限
+      // 再次检查geolocator权限
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('位置权限被拒绝');
-          return null;
+          throw Exception('位置权限被拒绝，无法获取天气信息');
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        print('位置权限被永久拒绝');
-        return null;
+        throw Exception('位置权限被永久拒绝，请在设置中手动开启位置权限');
       }
 
       // 获取当前位置
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low, // 降低精度要求
-        timeLimit: const Duration(seconds: 10), // 添加超时限制
+        desiredAccuracy: LocationAccuracy.low,
+        timeLimit: const Duration(seconds: 15),
       );
 
       return position;
     } catch (e) {
       print('获取位置失败: $e');
-      return null;
+      rethrow;
+    }
+  }
+
+  /// 使用permission_handler请求位置权限
+  Future<void> _requestLocationPermissions() async {
+    // 检查精确位置权限
+    var status = await Permission.location.status;
+
+    if (status.isDenied) {
+      // 请求权限
+      status = await Permission.location.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      throw Exception('位置权限被永久拒绝，请在应用设置中手动开启');
+    }
+
+    if (status.isDenied) {
+      throw Exception('需要位置权限才能获取天气信息');
     }
   }
 

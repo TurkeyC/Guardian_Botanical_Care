@@ -99,24 +99,39 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(20),
-            shape: const CircleBorder(),
-            backgroundColor: Colors.green[100],
-            foregroundColor: Colors.green[700],
-          ),
-          child: Icon(icon, size: 32),
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(20),
+                shape: const CircleBorder(),
+                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                elevation: 0,
+                textStyle: const TextStyle(
+                  inherit: false,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              child: Icon(icon, size: 32),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
+      ),
     );
   }
 
