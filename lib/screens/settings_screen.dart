@@ -162,6 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ...AppThemeType.values.map((themeType) {
               final isSelected = settingsProvider.currentTheme == themeType;
               return Container(
+                key: ValueKey('theme_${themeType.name}'), // 添加唯一key避免GlobalKey冲突
                 margin: const EdgeInsets.only(bottom: 12),
                 child: InkWell(
                   onTap: () async {
@@ -175,14 +176,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       border: Border.all(
                         color: isSelected
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.withOpacity(0.3),
+                          : Colors.grey.withValues(alpha: 0.3),
                         width: isSelected ? 2 : 1,
                       ),
                       color: isSelected
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                         : Theme.of(context).colorScheme.surface,
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min, // 防止布局溢出
                       children: [
                         // 主题预览图标
                         Container(
@@ -204,6 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min, // 防止垂直溢出
                             children: [
                               Text(
                                 AppThemes.getThemeName(themeType),
@@ -212,12 +215,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   color: isSelected
                                     ? Theme.of(context).colorScheme.primary
                                     : null,
+                                  inherit: true, // 确保inherit一致性
                                 ),
+                                overflow: TextOverflow.ellipsis, // 防止文本溢出
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 AppThemes.getThemeDescription(themeType),
-                                style: Theme.of(context).textTheme.bodySmall,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  inherit: true, // 确保inherit一致性
+                                ),
+                                overflow: TextOverflow.ellipsis, // 防止文本溢出
+                                maxLines: 2, // 限制最大行数
                               ),
                             ],
                           ),
@@ -232,14 +241,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         else
                           Icon(
                             Icons.radio_button_unchecked,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withValues(alpha: 0.5),
                           ),
                       ],
                     ),
                   ),
                 ),
               );
-            }),
+            }).toList(), // 确保返回List而不是Iterable
           ],
         ),
       ),

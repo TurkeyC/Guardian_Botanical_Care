@@ -143,10 +143,12 @@ class AppThemes {
         selectedLabelStyle: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
+          inherit: true,
         ),
         unselectedLabelStyle: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w400,
+          inherit: true,
         ),
       ),
 
@@ -164,36 +166,43 @@ class AppThemes {
           fontSize: 32,
           fontWeight: FontWeight.w700,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         headlineMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w600,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         titleLarge: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         titleMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         bodyLarge: TextStyle(
           fontSize: 17,
           fontWeight: FontWeight.w400,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         bodyMedium: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w400,
           color: Color(0xFF1C1C1E),
+          inherit: true,
         ),
         bodySmall: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w400,
           color: Color(0xFF8E8E93),
+          inherit: true,
         ),
       ),
     );
