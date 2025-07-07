@@ -1,81 +1,316 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
+import '../themes/app_themes.dart';
+import '../widgets/apple_style_widgets.dart';
+import '../widgets/apple_animations.dart';
 
 class DiagnosisScreen extends StatelessWidget {
   const DiagnosisScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        final isDynamic = settings.currentTheme == AppThemeType.dynamic;
+
+        if (isDynamic) {
+          return _buildDynamicScreen(context);
+        } else {
+          return _buildMinimalScreen(context);
+        }
+      },
+    );
+  }
+
+  // 灵动主题版本 - 丰富动效
+  Widget _buildDynamicScreen(BuildContext context) {
+    return Scaffold(
+      appBar: GlassAppBar(
+        title: '专业诊断',
+      ),
+      body: ParticleBackground(
+        particleCount: 30,
+        particleColor: Colors.blue.withValues(alpha: 0.3),
+        particleSize: 1.5,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 主图标 - 带呼吸动画
+                AnimatedContainer2D(
+                  animationType: AnimationType.combined,
+                  duration: const Duration(milliseconds: 800),
+                  child: _DynamicIcon(),
+                ),
+                const SizedBox(height: 32),
+
+                // 标题 - 渐变文字
+                AnimatedContainer2D(
+                  animationType: AnimationType.slideUp,
+                  duration: const Duration(milliseconds: 600),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: AppThemes.appleBlueGradient,
+                    ).createShader(bounds),
+                    child: const Text(
+                      '专业诊断服务',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 描述文字 - 毛玻璃容器
+                AnimatedContainer2D(
+                  animationType: AnimationType.fade,
+                  duration: const Duration(milliseconds: 800),
+                  child: GlassContainer(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      '这里将提供更专业的植物健康诊断服务\n包括专家咨询、社区问答等功能',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // 功能卡片 - 使用浮动卡片和错位动画
+                _buildDynamicFeatureCard(
+                  icon: Icons.group,
+                  title: '社区问答',
+                  description: '与其他植物爱好者交流经验',
+                  gradientColors: AppThemes.appleGreenGradient,
+                  delay: 200,
+                  onTap: () => _showComingSoonDialog(context, '社区问答'),
+                ),
+                const SizedBox(height: 16),
+                _buildDynamicFeatureCard(
+                  icon: Icons.psychology,
+                  title: 'AI深度诊断',
+                  description: '更精准的植物健康分析',
+                  gradientColors: AppThemes.applePurpleGradient,
+                  delay: 400,
+                  isPro: true,
+                  onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
+                ),
+                const SizedBox(height: 16),
+                _buildDynamicFeatureCard(
+                  icon: Icons.person_outline,
+                  title: '专家咨询',
+                  description: '预约专业园艺师一对一指导',
+                  gradientColors: AppThemes.appleOrangeGradient,
+                  delay: 600,
+                  isPro: true,
+                  onTap: () => _showOnlyForPro(context, '专家咨询'),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 简约主题版本 - 保持原样
+  Widget _buildMinimalScreen(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('专业诊断'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: SingleChildScrollView(  // 添加这个组件使内容可滚动
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medical_services_outlined,
-              size: 120,
-              color: Colors.blue[300],
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              '专业诊断服务',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.medical_services_outlined,
+                size: 120,
+                color: Colors.blue[300],
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '这里将提供更专业的植物健康诊断服务\n包括专家咨询、社区问答等功能',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                height: 1.5,
+              const SizedBox(height: 32),
+              const Text(
+                '专业诊断服务',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
+              const SizedBox(height: 16),
+              Text(
+                '这里将提供更专业的植物健康诊断服务\n包括专家咨询、社区问答等功能',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
 
-            // 功能卡片
-            _buildFeatureCard(
-              icon: Icons.group,
-              title: '社区问答',
-              description: '与其他植物爱好者交流经验',
-              color: Colors.green,
-              onTap: () => _showComingSoonDialog(context, '社区问答'),
-            ),
-            const SizedBox(height: 16),
-            _buildFeatureCard(
-              icon: Icons.psychology,
-              title: 'AI深度诊断',
-              description: '更精准的植物健康分析',
-              color: Colors.purple,
-              isPro: true, // 会员功能
-              onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
-            ),
-            const SizedBox(height: 16),
-            _buildFeatureCard(
-              icon: Icons.person_outline,
-              title: '专家咨询',
-              description: '预约专业园艺师一对一指导',
-              color: Colors.orange,
-              isPro: true, // 会员功能
-              onTap: () => _showOnlyForPro(context, '专家咨询'),
-            ),
-            // 底部添加额外的空间确保在小屏幕上有足够的滚动空间
-            const SizedBox(height: 24),
-          ],
+              // 功能卡片 - 保持原样
+              _buildFeatureCard(
+                icon: Icons.group,
+                title: '社区问答',
+                description: '与其他植物爱好者交流经验',
+                color: Colors.green,
+                onTap: () => _showComingSoonDialog(context, '社区问答'),
+              ),
+              const SizedBox(height: 16),
+              _buildFeatureCard(
+                icon: Icons.psychology,
+                title: 'AI深度诊断',
+                description: '更精准的植物健康分析',
+                color: Colors.purple,
+                isPro: true,
+                onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
+              ),
+              const SizedBox(height: 16),
+              _buildFeatureCard(
+                icon: Icons.person_outline,
+                title: '专家咨询',
+                description: '预约专业园艺师一对一指导',
+                color: Colors.orange,
+                isPro: true,
+                onTap: () => _showOnlyForPro(context, '专家咨询'),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
+  // 灵动主题的功能卡片
+  Widget _buildDynamicFeatureCard({
+    required IconData icon,
+    required String title,
+    required String description,
+    required List<Color> gradientColors,
+    required VoidCallback onTap,
+    required int delay,
+    bool isPro = false,
+  }) {
+    return AnimatedContainer2D(
+      animationType: AnimationType.slideLeft,
+      duration: Duration(milliseconds: 600 + delay),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: gradientColors.first.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: gradientColors.first,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          if (isPro) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF1A1A1A), Color(0xFFD4AF37)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Text(
+                                'Pro',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey[400],
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 原有的简约主题功能卡片
   Widget _buildFeatureCard({
     required IconData icon,
     required String title,
@@ -95,7 +330,7 @@ class DiagnosisScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -195,10 +430,10 @@ class DiagnosisScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A).withOpacity(0.05),
+                color: const Color(0xFF1A1A1A).withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withOpacity(0.3),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                 ),
               ),
               child: const Row(
@@ -245,6 +480,100 @@ class DiagnosisScreen extends StatelessWidget {
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actionsAlignment: MainAxisAlignment.spaceBetween,
       ),
+    );
+  }
+}
+
+// 灵动主题的动态图标组件
+class _DynamicIcon extends StatefulWidget {
+  @override
+  State<_DynamicIcon> createState() => _DynamicIconState();
+}
+
+class _DynamicIconState extends State<_DynamicIcon>
+    with TickerProviderStateMixin {
+  late AnimationController _breathingController;
+  late AnimationController _glowController;
+  late Animation<double> _breathingAnimation;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 呼吸动画控制器
+    _breathingController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // 发光动画控制器
+    _glowController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _breathingAnimation = Tween<double>(begin: 0.98, end: 1.02).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
+    );
+
+    _glowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _breathingController.dispose();
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_breathingAnimation, _glowAnimation]),
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _breathingAnimation.value,
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF4A90E2),  // 更柔和的蓝色
+                  Color(0xFF7B68EE),  // 淡紫色
+                  Color(0xFF50C878),  // 薄荷绿
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                stops: [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4A90E2).withValues(alpha: _glowAnimation.value),
+                  blurRadius: 25,
+                  offset: const Offset(0, 8),
+                  spreadRadius: 2,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF7B68EE).withValues(alpha: _glowAnimation.value * 0.6),
+                  blurRadius: 35,
+                  offset: const Offset(0, 15),
+                  spreadRadius: -5,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.medical_services_outlined,
+              size: 60,
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
     );
   }
 }
