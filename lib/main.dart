@@ -14,7 +14,8 @@ import 'widgets/apple_style_widgets.dart';
 import 'screens/splash_screen.dart'; // 添加启动页导入
 import 'package:window_manager/window_manager.dart';// 添加Windows窗口管理器导入
 import 'dart:io'; // 添加 Platform 类的导入
-import 'package:flutter_localizations/flutter_localizations.dart';// 添加本地化支持导入
+import 'package:flutter_localizations/flutter_localizations.dart'; // 添加本地化支持导入
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // 添加 SQLite FFI 支持导入
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,12 @@ void main() async {
       await windowManager.show();
       await windowManager.focus();
     });
+
+    // 初始化 SQLite FFI
+    sqfliteFfiInit();
+    // 设置数据库工厂
+    databaseFactory = databaseFactoryFfi;
+
   }
 
   // 初始化API服务

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../models/plant.dart';
 
 class PlantDatabaseService {
@@ -14,11 +16,38 @@ class PlantDatabaseService {
   }
 
   Future<Database> _initDatabase() async {
+    // 根据平台选择合适的数据库初始化方式
+    if (Platform.isWindows || Platform.isLinux) {
+      return await _initDesktopDatabase();
+    } else {
+      return await _initMobileDatabase();
+    }
+  }
+
+  // 移动平台的数据库初始化
+  Future<Database> _initMobileDatabase() async {
     String path = join(await getDatabasesPath(), 'plants.db');
     return await openDatabase(
       path,
       version: 1,
       onCreate: _onCreate,
+    );
+  }
+
+  // 桌面平台的数据库初始化
+  Future<Database> _initDesktopDatabase() async {
+    // 确保 FFI 已初始化
+    sqfliteFfiInit();
+    // 获取桌面平台的数据库路径
+    final databaseFactory = databaseFactoryFfi;
+    String path = join(await databaseFactory.getDatabasesPath(), 'plants.db');
+    // 使用 FFI 实现打开数据库
+    return await databaseFactory.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: _onCreate,
+      ),
     );
   }
 
