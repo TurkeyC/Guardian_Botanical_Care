@@ -12,9 +12,36 @@ import 'providers/settings_provider.dart';
 import 'themes/app_themes.dart';
 import 'widgets/apple_style_widgets.dart';
 import 'screens/splash_screen.dart'; // 添加启动页导入
+import 'package:window_manager/window_manager.dart';// 添加Windows窗口管理器导入
+import 'dart:io'; // 添加 Platform 类的导入
+import 'package:flutter_localizations/flutter_localizations.dart';// 添加本地化支持导入
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Windows 平台窗口设置
+  if (Platform.isWindows) {
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(400, 800),  // 初始窗口大小，类似手机尺寸
+      minimumSize: Size(360, 640),  // 最小窗口大小
+      maximumSize: Size(480, 900),  // 最大窗口大小，防止窗口过宽
+      center: true,  // 窗口居中显示
+      backgroundColor: Colors.transparent,
+      title: 'Guardian Botanical Care',
+      titleBarStyle: TitleBarStyle.normal,
+    );
+
+    // 设置窗口图标
+    await windowManager.setIcon('assets/images/windows_icon.png');
+
+
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   // 初始化API服务
   ApiService.instance.init();
@@ -44,15 +71,45 @@ class MyApp extends StatelessWidget {
           }
         });
 
+        // 获取基础主题
+        final baseTheme = AppThemes.getTheme(settingsProvider.currentTheme);
+
+        // 根据平台选择适当的字体
+        final platformSpecificTheme = Platform.isWindows
+            ? baseTheme.copyWith(
+          textTheme: baseTheme.textTheme.apply(
+            fontFamily: 'Microsoft YaHei',
+          ),
+        )
+            : baseTheme;
+
         return MaterialApp(
           title: 'Guardian Botanical Care',
-          theme: AppThemes.getTheme(settingsProvider.currentTheme),
-          home: const SplashScreen(), // 使用SplashScreen作为入口
+          theme: platformSpecificTheme,
+          home: const SplashScreen(),
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('zh', 'CN'),
+            Locale('en', 'US'),
+          ],
+          // 确保在桌面平台上使用"竖向"的布局
+          builder: (context, child) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: child!,
+              ),
+            );
+          },
           // 添加路由配置
           routes: {
-            '/home': (context) => const MainScreen(), // 添加主屏幕路由
-            '/membership': (context) => const MembershipScreen(), // 添加会员窗口路由
+            '/home': (context) => const MainScreen(),
+            '/membership': (context) => const MembershipScreen(),
           },
         );
       },

@@ -31,6 +31,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # 添加 Flutter 本地化支持
+  flutter_localizations:
+    sdk: flutter
+
   # UI框架
   cupertino_icons: ^1.0.8
 
@@ -69,6 +73,9 @@ dependencies:
 
   # 启动页面
   flutter_native_splash: ^2.3.0
+
+  # 支持Windows窗口控制
+  window_manager: ^0.3.7
 
 dev_dependencies:
   flutter_test:
