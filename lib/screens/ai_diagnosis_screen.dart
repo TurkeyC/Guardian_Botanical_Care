@@ -274,9 +274,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: isDynamic
-                    ? Colors.white
-                    : Theme.of(context).textTheme.titleLarge?.color,
+                color: isDynamic ? Colors.deepPurple : Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
 
@@ -287,9 +285,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: isDynamic
-                    ? Colors.white70
-                    : Theme.of(context).textTheme.bodyMedium?.color,
+                color: isDynamic ? Colors.deepPurple : Theme.of(context).textTheme.bodyMedium?.color,
               ),
             ),
 
@@ -306,7 +302,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                           Container(
                             height: 10,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.purpleAccent.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -347,7 +343,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: isDynamic ? Colors.white : Colors.grey[700],
+                color: isDynamic ? Colors.deepPurple : Colors.grey[700],
               ),
             ),
           ],
@@ -376,7 +372,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: isDynamic ? Colors.white : null,
+                  color: isDynamic ? Colors.purple : null,
                 ),
               ),
 
@@ -406,14 +402,14 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDynamic
-            ? Colors.white.withValues(alpha: 0.1)
+            ? Colors.black.withValues(alpha: 0.4) // 加深背景色以增强对比度
             : Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDynamic
-              ? Colors.white.withValues(alpha: 0.2)
+              ? Colors.purple.withValues(alpha: 0.5) // 加深边框颜色
               : Colors.grey[300]!,
-          width: 1,
+          width: isDynamic ? 2 : 1,
         ),
       ),
       child: Column(
@@ -423,12 +419,12 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
             height: 200,
             decoration: BoxDecoration(
               color: isDynamic
-                  ? Colors.black.withValues(alpha: 0.2)
+                  ? Colors.black.withValues(alpha: 0.5) // 加深背景色
                   : Colors.grey[200],
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDynamic
-                    ? Colors.purple.withValues(alpha: 0.4)
+                    ? Colors.purple.withValues(alpha: 0.6) // 加深边框颜色
                     : Colors.grey[400]!,
                 width: isDynamic ? 2 : 1,
               ),
@@ -441,7 +437,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                     Icons.add_photo_alternate_outlined,
                     size: 60,
                     color: isDynamic
-                        ? Colors.white.withValues(alpha: 0.7)
+                        ? Colors.white // 确保图标颜色为纯白色以提高可见度
                         : Colors.grey[500],
                   ),
                   const SizedBox(height: 12),
@@ -450,7 +446,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                     style: TextStyle(
                       fontSize: 16,
                       color: isDynamic
-                          ? Colors.white.withValues(alpha: 0.9)
+                          ? Colors.white // 确保文字颜色为纯白色
                           : Colors.grey[700],
                     ),
                   ),
@@ -460,7 +456,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                     style: TextStyle(
                       fontSize: 12,
                       color: isDynamic
-                          ? Colors.white.withValues(alpha: 0.6)
+                          ? Colors.white.withValues(alpha: 0.8) // 增加透明度以区分不同文字层级
                           : Colors.grey[500],
                     ),
                   ),
@@ -499,18 +495,18 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isDynamic
-            ? Colors.black.withValues(alpha: 0.3)
+            ? Colors.black.withValues(alpha: 0.5) // 加深背景色以增强对比度
             : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDynamic
-              ? Colors.purple.withValues(alpha: 0.3)
+              ? Colors.purple.withValues(alpha: 0.5) // 加深边框颜色
               : Colors.grey[300]!,
         ),
         boxShadow: isDynamic
             ? [
                 BoxShadow(
-                  color: Colors.purple.withValues(alpha: 0.2),
+                  color: Colors.purple.withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 ),
@@ -531,7 +527,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDynamic
-                  ? Colors.purple.withValues(alpha: 0.2)
+                  ? Colors.purple.withValues(alpha: 0.4) // 加深颜色以增强对比度
                   : Colors.purple[50],
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
@@ -553,10 +549,10 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: confidenceColor.withValues(alpha: isDynamic ? 0.2 : 0.1),
+                    color: confidenceColor.withValues(alpha: isDynamic ? 0.3 : 0.1), // 增加透明度
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: confidenceColor.withValues(alpha: isDynamic ? 0.6 : 0.3),
+                      color: confidenceColor.withValues(alpha: isDynamic ? 0.7 : 0.3), // 增加边框透明度
                     ),
                   ),
                   child: Row(
@@ -564,14 +560,18 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                       Icon(
                         Icons.analytics_outlined,
                         size: 14,
-                        color: confidenceColor,
+                        color: isDynamic
+                            ? confidenceColor.withValues(alpha: 1.0) // 确保颜色完全不透明
+                            : confidenceColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '置信度 $confidencePercentage%',
                         style: TextStyle(
                           fontSize: 12,
-                          color: confidenceColor,
+                          color: isDynamic
+                              ? confidenceColor.withValues(alpha: 1.0) // 确保颜色完全不透明
+                              : confidenceColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -593,7 +593,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                   result['description'],
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDynamic ? Colors.white70 : null,
+                    color: isDynamic ? Colors.white : null, // 改为纯白色增强可读性
                   ),
                 ),
 
@@ -605,7 +605,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isDynamic ? Colors.white70 : null,
+                    color: isDynamic ? Colors.white : null, // 改为纯白色增强可读性
                   ),
                 ),
 
@@ -621,14 +621,14 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
                         Icon(
                           Icons.check_circle_outline,
                           size: 18,
-                          color: isDynamic ? Colors.green[300] : Colors.green,
+                          color: isDynamic ? Colors.green : Colors.green, // 保持绿色图标
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             result['solutions'][index],
                             style: TextStyle(
-                              color: isDynamic ? Colors.white70 : null,
+                              color: isDynamic ? Colors.white : null, // 改为纯白色增强可读性
                             ),
                           ),
                         ),
@@ -654,9 +654,9 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
             icon: const Icon(Icons.save_alt),
             label: const Text('保存报告'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: isDynamic ? Colors.white : null,
+              foregroundColor: isDynamic ? Colors.green[900] : null,
               side: BorderSide(
-                color: isDynamic ? Colors.white.withValues(alpha: 0.5) : Colors.grey[400]!,
+                color: isDynamic ? Colors.white : Colors.green[900]!, // 增加边框对比度
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),

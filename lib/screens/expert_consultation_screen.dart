@@ -50,7 +50,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
       'isOnline': true,
     },
     {
-      'name': '李明',
+      'name': 'Liam van Dijk',
       'avatar': 'https://randomuser.me/api/portraits/men/32.jpg',
       'specialty': '花卉栽培专家',
       'rating': 4.7,
@@ -58,12 +58,12 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
       'price': 58,
       'availableTime': '明日 10:00-20:00',
       'experience': '12年',
-      'description': '中国农业大学农学博士，主攻花卉栽培与遗传育种方向，现任某植物园技术顾问，对各类花卉的生长特性、栽培技术及常见问题有深入研究。',
+      'description': '荷兰瓦赫宁根大学博士，主攻花卉栽培与遗传育种方向，现任某植物园技术顾问，对各类花卉的生长特性、栽培技术及常见问题有深入研究。',
       'tags': ['花卉栽培', '品种选择', '开花技巧'],
       'isOnline': false,
     },
     {
-      'name': '王芳',
+      'name': 'Fiona Wang',
       'avatar': 'https://randomuser.me/api/portraits/women/68.jpg',
       'specialty': '多肉植物专家',
       'rating': 4.8,
@@ -71,7 +71,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
       'price': 49,
       'availableTime': '今日 09:00-21:00',
       'experience': '6年',
-      'description': '资深多肉植物爱好者，自建多肉植物网站与专栏作者，著有《多肉植物养护指南》一书，对多肉植物的品种、繁殖与日常管理有丰富经验。',
+      'description': '美国康奈尔大学农业与生命科学学院资深研究员，多肉植物爱好者，自建多肉植物网站与专栏作者，著有《多肉植物养护指南》一书，对多肉植物的品种、繁殖与日常管理有丰富经验。',
       'tags': ['多肉植物', '组合盆栽', '光照管理'],
       'isOnline': true,
     },
@@ -228,11 +228,126 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
             '正在为您筛选专业植物专家...',
             style: TextStyle(
               fontSize: 16,
-              color: isDynamic ? Colors.white70 : null,
+              color: isDynamic ? Colors.orange : null,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // 搜索栏
+  Widget _buildSearchBar(bool isDynamic) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: isDynamic
+            ? Colors.black.withValues(alpha: 0.4) // 加深背景色以增强对比度
+            : Colors.grey[100],
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: isDynamic
+              ? Colors.white.withValues(alpha: 0.5) // 加深边框颜色增强对比度
+              : Colors.grey[300]!,
+          width: isDynamic ? 1.5 : 1, // 增加边框宽度
+        ),
+        boxShadow: isDynamic
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ]
+            : null,
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: TextStyle(
+          color: isDynamic ? Colors.black : null, // 确保文本是纯白色
+        ),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          border: InputBorder.none,
+          hintText: '搜索专家名称、专业领域',
+          hintStyle: TextStyle(
+            color: isDynamic
+                ? Colors.white.withValues(alpha: 0.7) // 提高提示文字的不透明度
+                : Colors.grey[500],
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: isDynamic
+                ? Colors.white // 使用纯白色图标
+                : Colors.grey[500],
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              Icons.filter_list,
+              color: isDynamic
+                  ? Colors.white // 使用纯白色图标
+                  : Colors.grey[600],
+            ),
+            onPressed: () {
+              // TODO: 显示筛选选项
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 分类标签
+  Widget _buildCategoryTabs(bool isDynamic) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _categories.length,
+      itemBuilder: (context, index) {
+        final isSelected = _selectedIndex == index;
+
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (isDynamic ? const Color(0xFFFF9800) : Theme.of(context).colorScheme.primary)
+                  : (isDynamic ? Colors.black.withValues(alpha: 0.4) : Colors.grey[100]), // 加深非选中标签的背景色
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected
+                    ? (isDynamic ? const Color(0xFFFF9800) : Theme.of(context).colorScheme.primary)
+                    : (isDynamic ? Colors.white.withValues(alpha: 0.5) : Colors.grey[300]!), // 加深非选中标签的边框颜色
+                width: isDynamic ? 1.5 : 1, // 增加边框宽度
+              ),
+              boxShadow: isSelected && isDynamic
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFFFF9800).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              _categories[index],
+              style: TextStyle(
+                color: isSelected
+                    ? (isDynamic ? Colors.white : Colors.white)
+                    : (isDynamic ? Colors.white : Colors.grey[800]),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -266,132 +381,18 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
     );
   }
 
-  // 搜索栏
-  Widget _buildSearchBar(bool isDynamic) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: isDynamic
-            ? Colors.white.withValues(alpha: 0.15)
-            : Colors.grey[100],
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: isDynamic
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.grey[300]!,
-          width: 1,
-        ),
-        boxShadow: isDynamic
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ]
-            : null,
-      ),
-      child: TextField(
-        controller: _searchController,
-        style: TextStyle(
-          color: isDynamic ? Colors.white : null,
-        ),
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          border: InputBorder.none,
-          hintText: '搜索专家名称、专业领域',
-          hintStyle: TextStyle(
-            color: isDynamic
-                ? Colors.white.withValues(alpha: 0.5)
-                : Colors.grey[500],
-          ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: isDynamic
-                ? Colors.white.withValues(alpha: 0.7)
-                : Colors.grey[500],
-          ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: isDynamic
-                  ? Colors.white.withValues(alpha: 0.7)
-                  : Colors.grey[600],
-            ),
-            onPressed: () {
-              // TODO: 显示筛选选项
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 分类标签
-  Widget _buildCategoryTabs(bool isDynamic) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _categories.length,
-      itemBuilder: (context, index) {
-        final isSelected = _selectedIndex == index;
-
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (isDynamic ? const Color(0xFFFF9800) : Theme.of(context).colorScheme.primary)
-                  : (isDynamic ? Colors.white.withValues(alpha: 0.1) : Colors.grey[100]),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected
-                    ? (isDynamic ? const Color(0xFFFF9800) : Theme.of(context).colorScheme.primary)
-                    : (isDynamic ? Colors.white.withValues(alpha: 0.3) : Colors.grey[300]!),
-              ),
-              boxShadow: isSelected && isDynamic
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFFFF9800).withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Text(
-              _categories[index],
-              style: TextStyle(
-                color: isSelected
-                    ? (isDynamic ? Colors.white : Colors.white)
-                    : (isDynamic ? Colors.white : Colors.grey[800]),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   // 专家卡片
   Widget _buildExpertCard(Map<String, dynamic> expert, bool isDynamic) {
     final cardColor = isDynamic
-        ? Colors.black.withValues(alpha: 0.2)
+        ? Colors.black.withValues(alpha: 0.5) // 加深卡片背景色
         : Colors.white;
 
     final borderColor = isDynamic
-        ? Colors.orange.withValues(alpha: 0.3)
+        ? Colors.orange.withValues(alpha: 0.5) // 加深边框颜色
         : Colors.grey[200]!;
 
     final shadowColor = isDynamic
-        ? Colors.orange.withValues(alpha: 0.2)
+        ? Colors.orange.withValues(alpha: 0.3) // 加深阴影颜色
         : Colors.black.withValues(alpha: 0.05);
 
     return GestureDetector(
@@ -403,7 +404,10 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor),
+          border: Border.all(
+            color: borderColor,
+            width: isDynamic ? 1.5 : 1, // 增加边框宽度
+          ),
           boxShadow: [
             BoxShadow(
               color: shadowColor,
@@ -429,13 +433,13 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isDynamic
-                                ? Colors.orange.withValues(alpha: 0.6)
+                                ? Colors.orange // 使用纯橙色边框
                                 : Colors.orange[200]!,
-                            width: 2,
+                            width: isDynamic ? 2.5 : 2, // 增加边框宽度
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.orange.withValues(alpha: isDynamic ? 0.3 : 0.1),
+                              color: Colors.orange.withValues(alpha: isDynamic ? 0.4 : 0.1),
                               blurRadius: 10,
                             ),
                           ],
@@ -491,7 +495,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: isDynamic ? Colors.white : Colors.black87,
+                                color: isDynamic ? Colors.white : Colors.black87, // 使用纯白色
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -510,7 +514,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             color: isDynamic
-                                ? Colors.white.withValues(alpha: 0.7)
+                                ? Colors.white // 使用纯白色增强可读性
                                 : Colors.grey[700],
                           ),
                         ),
@@ -529,7 +533,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                               expert['rating'].toString(),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: isDynamic ? Colors.white : Colors.black87,
+                                color: isDynamic ? Colors.white : Colors.black87, // 使用纯白色
                               ),
                             ),
                             const SizedBox(width: 2),
@@ -538,7 +542,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDynamic
-                                    ? Colors.white.withValues(alpha: 0.5)
+                                    ? Colors.white.withValues(alpha: 0.8) // 提高透明度
                                     : Colors.grey[600],
                               ),
                             ),
@@ -560,7 +564,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.orange.withValues(alpha: 0.3),
+                          color: Colors.orange.withValues(alpha: 0.4), // 增加阴影透明度
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -591,7 +595,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                         Icons.access_time,
                         size: 16,
                         color: isDynamic
-                            ? Colors.orange[300]
+                            ? Colors.orange // 使用纯橙色
                             : Colors.orange[700],
                       ),
                       const SizedBox(width: 4),
@@ -600,7 +604,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           color: isDynamic
-                              ? Colors.white.withValues(alpha: 0.7)
+                              ? Colors.white // 使用纯白色
                               : Colors.grey[700],
                         ),
                       ),
@@ -609,7 +613,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                         Icons.work_outline,
                         size: 16,
                         color: isDynamic
-                            ? Colors.orange[300]
+                            ? Colors.orange // 使用纯橙色
                             : Colors.orange[700],
                       ),
                       const SizedBox(width: 4),
@@ -618,7 +622,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           color: isDynamic
-                              ? Colors.white.withValues(alpha: 0.7)
+                              ? Colors.white // 使用纯白色
                               : Colors.grey[700],
                         ),
                       ),
@@ -636,20 +640,21 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: isDynamic
-                              ? Colors.orange.withValues(alpha: 0.2)
+                              ? Colors.orange.withValues(alpha: 0.3) // 加深背景色
                               : Colors.orange[50],
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isDynamic
-                                ? Colors.orange.withValues(alpha: 0.3)
+                                ? Colors.orange.withValues(alpha: 0.6) // 加深边框色
                                 : Colors.orange[200]!,
+                            width: isDynamic ? 1.5 : 1, // 增加边框宽度
                           ),
                         ),
                         child: Text(
                           tag,
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDynamic ? Colors.orange[200] : Colors.orange[800],
+                            color: isDynamic ? Colors.white : Colors.orange[800], // 使用纯白色
                           ),
                         ),
                       );
@@ -661,21 +666,6 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                   // 按钮区域
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: isDynamic
-                                  ? Colors.white.withValues(alpha: 0.5)
-                                  : Colors.grey[400]!,
-                            ),
-                            foregroundColor: isDynamic ? Colors.white : null,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
-                          child: Text('查看详情'),
-                        ),
-                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
