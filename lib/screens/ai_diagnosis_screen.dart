@@ -21,6 +21,7 @@ import '../themes/app_themes.dart';
 import '../widgets/apple_style_widgets.dart';
 import '../widgets/apple_animations.dart';
 import 'dart:async';
+import 'dart:math';
 
 class AiDiagnosisScreen extends StatefulWidget {
   const AiDiagnosisScreen({super.key});
@@ -44,6 +45,26 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
     '连接云端数据库...',
     '准备诊断参数...',
     '校准图像分析模块...',
+    '加载病害特征数据库...',
+    '启动智能分析核心...',
+    '优化图像增强算法...',
+    '同步用户配置信息...',
+    '激活本地缓存系统...',
+    '构建诊断推理链...',
+    '预加载常用植物图谱...',
+    '检测设备兼容性...',
+    '初始化网络通信协议...',
+    '验证AI模型完整性...',
+    '唤醒后台服务进程...',
+    '读取植物健康历史记录...',
+    '配置多线程计算资源...',
+    '启动边缘计算模块...',
+    '更新本地知识库...',
+    '加载叶片纹理分析器...',
+    '初始化病虫害匹配系统...',
+    '激活实时反馈机制...',
+    '准备用户交互反馈模型...',
+    '即将加载成功!',
   ];
 
   final List<Map<String, dynamic>> _diagnosisResults = [
@@ -109,12 +130,13 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
   // 模拟AI模型加载过程
   void _simulateLoading() {
     int messageIndex = 0;
-    const loadingDuration = Duration(milliseconds: 5000); // 总加载时间
-    const updateInterval = Duration(milliseconds: 100);   // 进度条更新间隔
+    const loadingDuration = Duration(milliseconds: 10000); // 总加载时间
+    const updateInterval = Duration(milliseconds: 100); // 进度条更新间隔
 
-    // 计算每次更新的进度增量
     final progressIncrement = updateInterval.inMilliseconds / loadingDuration.inMilliseconds;
-    final messageInterval = loadingDuration.inMilliseconds / _loadingMessages.length;
+
+    // 不预先计算每条消息间隔，而是随机决定
+    final random = Random();
 
     Timer.periodic(updateInterval, (timer) {
       if (_progress >= 1.0) {
@@ -128,10 +150,17 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
       setState(() {
         _progress += progressIncrement;
 
-        // 定期更换加载消息
-        if (timer.tick % (messageInterval ~/ updateInterval.inMilliseconds) == 0 &&
+        // 随机决定是否切换消息
+        // 每次更新有5%的概率切换消息，但确保不超过消息列表长度
+        if (random.nextDouble() < 0.05 &&
             messageIndex < _loadingMessages.length - 1) {
           messageIndex++;
+          _statusMessage = _loadingMessages[messageIndex];
+        }
+
+        // 确保在接近结束时显示最后一条消息
+        if (_progress > 0.95 && messageIndex < _loadingMessages.length - 1) {
+          messageIndex = _loadingMessages.length - 1;
           _statusMessage = _loadingMessages[messageIndex];
         }
       });
@@ -368,7 +397,7 @@ class _AiDiagnosisScreenState extends State<AiDiagnosisScreen> with TickerProvid
 
               // 诊断结果部分
               Text(
-                '诊断结果',
+                '往期诊断结果',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
