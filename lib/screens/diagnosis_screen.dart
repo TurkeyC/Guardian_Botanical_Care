@@ -20,9 +20,18 @@ import '../providers/settings_provider.dart';
 import '../themes/app_themes.dart';
 import '../widgets/apple_style_widgets.dart';
 import '../widgets/apple_animations.dart';
+import 'ai_diagnosis_screen.dart'; // 导入AI诊断页面
+import 'expert_consultation_screen.dart'; // 导入专家咨询页面
 
-class DiagnosisScreen extends StatelessWidget {
+class DiagnosisScreen extends StatefulWidget {
   const DiagnosisScreen({super.key});
+
+  @override
+  State<DiagnosisScreen> createState() => _DiagnosisScreenState();
+}
+
+class _DiagnosisScreenState extends State<DiagnosisScreen> {
+  bool _devModeEnabled = false; // 开发者模式开关
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +128,9 @@ class DiagnosisScreen extends StatelessWidget {
                   gradientColors: AppThemes.applePurpleGradient,
                   delay: 400,
                   isPro: true,
-                  onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
+                  onTap: () => _devModeEnabled
+                      ? _navigateToAiDiagnosis(context)
+                      : _showOnlyForPro(context, 'AI深度诊断'),
                 ),
                 const SizedBox(height: 16),
                 _buildDynamicFeatureCard(
@@ -129,9 +140,18 @@ class DiagnosisScreen extends StatelessWidget {
                   gradientColors: AppThemes.appleOrangeGradient,
                   delay: 600,
                   isPro: true,
-                  onTap: () => _showOnlyForPro(context, '专家咨询'),
+                  onTap: () => _devModeEnabled
+                      ? _navigateToExpertConsultation(context)
+                      : _showOnlyForPro(context, '专家咨询'),
                 ),
                 const SizedBox(height: 24),
+
+                // 开发者模式开关
+                AnimatedContainer2D(
+                  animationType: AnimationType.fade,
+                  duration: const Duration(milliseconds: 400),
+                  child: _buildDevModeSwitch(),
+                ),
               ],
             ),
           ),
@@ -193,7 +213,9 @@ class DiagnosisScreen extends StatelessWidget {
                 description: '更精准的植物健康分析',
                 color: Colors.purple,
                 isPro: true,
-                onTap: () => _showOnlyForPro(context, 'AI深度诊断'),
+                onTap: () => _devModeEnabled
+                    ? _navigateToAiDiagnosis(context)
+                    : _showOnlyForPro(context, 'AI深度诊断'),
               ),
               const SizedBox(height: 16),
               _buildFeatureCard(
@@ -202,9 +224,14 @@ class DiagnosisScreen extends StatelessWidget {
                 description: '预约专业园艺师一对一指导',
                 color: Colors.orange,
                 isPro: true,
-                onTap: () => _showOnlyForPro(context, '专家咨询'),
+                onTap: () => _devModeEnabled
+                    ? _navigateToExpertConsultation(context)
+                    : _showOnlyForPro(context, '专家咨询'),
               ),
               const SizedBox(height: 24),
+
+              // 开发者模式开关
+              _buildDevModeSwitch(),
             ],
           ),
         ),
@@ -497,6 +524,113 @@ class DiagnosisScreen extends StatelessWidget {
         actionsAlignment: MainAxisAlignment.spaceBetween,
       ),
     );
+  }
+
+  // 开发者模式开关组件
+  Widget _buildDevModeSwitch() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _devModeEnabled = !_devModeEnabled;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '开发者模式',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Switch(
+              value: _devModeEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _devModeEnabled = value;
+                });
+              },
+              activeColor: const Color(0xFFD4AF37),
+              inactiveTrackColor: Colors.grey[300],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToAiDiagnosis(BuildContext context) {
+    // 显示加载中提示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('AI深度诊断'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('尊敬的VIP用户, 欢迎使用AI深度诊断功能, 正在加载中...'),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+
+    // 延迟一会后关闭对话框并跳转到AI诊断页面
+    Future.delayed(const Duration(seconds: 2), () {
+      // 关闭加载对话框
+      Navigator.pop(context);
+      // 导航到AI诊断页面
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AiDiagnosisScreen()),
+      );
+    });
+  }
+
+  void _navigateToExpertConsultation(BuildContext context) {
+    // 显示加载中提示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('专家咨询'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('尊敬的VIP用户, 欢迎使用专家咨询功能, 正在加载中...'),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+
+    // 延迟一会后关闭对话框并跳转到专家咨询页面
+    Future.delayed(const Duration(seconds: 2), () {
+      // 关闭加载对话框
+      Navigator.pop(context);
+      // 导航到专家咨询页面
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ExpertConsultationScreen()),
+      );
+    });
   }
 }
 
