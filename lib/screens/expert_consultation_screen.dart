@@ -20,6 +20,7 @@ import '../providers/settings_provider.dart';
 import '../themes/app_themes.dart';
 import '../widgets/apple_style_widgets.dart';
 import '../widgets/apple_animations.dart';
+import 'ai_expert_chat_screen.dart';
 import 'dart:async';
 
 class ExpertConsultationScreen extends StatefulWidget {
@@ -38,7 +39,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
   final List<Map<String, dynamic>> _experts = [
     {
       'name': '张晓华',
-      'avatar': 'https://randomuser.me/api/portraits/women/44.jpg',
+      'avatar': 'assets/images/avatar/44.jpg',
       'specialty': '室内植物养护专家',
       'rating': 4.9,
       'reviewCount': 128,
@@ -51,7 +52,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
     },
     {
       'name': 'Liam van Dijk',
-      'avatar': 'https://randomuser.me/api/portraits/men/32.jpg',
+      'avatar': 'assets/images/avatar/32.jpg',
       'specialty': '花卉栽培专家',
       'rating': 4.7,
       'reviewCount': 95,
@@ -64,7 +65,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
     },
     {
       'name': 'Fiona Wang',
-      'avatar': 'https://randomuser.me/api/portraits/women/68.jpg',
+      'avatar': 'assets/images/avatar/68.jpg',
       'specialty': '多肉植物专家',
       'rating': 4.8,
       'reviewCount': 156,
@@ -77,7 +78,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
     },
     {
       'name': '赵强',
-      'avatar': 'https://randomuser.me/api/portraits/men/15.jpg',
+      'avatar': 'assets/images/avatar/15.jpg',
       'specialty': '园林植物专家',
       'rating': 4.6,
       'reviewCount': 87,
@@ -90,7 +91,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
     },
     {
       'name': '刘婷',
-      'avatar': 'https://randomuser.me/api/portraits/women/48.jpg',
+      'avatar': 'assets/images/avatar/48.jpg',
       'specialty': '兰花栽培专家',
       'rating': 5.0,
       'reviewCount': 67,
@@ -99,6 +100,19 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
       'experience': '10年',
       'description': '中国兰花协会会员，专注兰花栽培与研究，多次获得兰花展览奖项，对各类兰花的品种特性、生长环境需求及繁殖技术有深入研究。',
       'tags': ['兰花栽培', '品种鉴赏', '繁殖技术'],
+      'isOnline': true,
+    },
+    {
+      'name': '若葉 睦',
+      'avatar': 'assets/images/avatar/mumu.png',
+      'specialty': '黄瓜种植专家',
+      'rating': 9.9,
+      'reviewCount': 103,
+      'price': 648,
+      'availableTime': '今日 08:00-23:00',
+      'experience': '15年',
+      'description': '月之森女子学园园艺部高级部员，专注黄瓜栽培与育种研究，多次参与Bushiroadキュウリ品种展示与评比并获多项荣誉，对各类黄瓜品种的特性、生长习性及高效栽培技术有深入系统的研究。',
+      'tags': ['黄瓜'],
       'isOnline': true,
     },
   ];
@@ -377,6 +391,61 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
             },
           ),
         ),
+
+        // AI 专家解答入口
+        Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDynamic ? Colors.black.withValues(alpha: 0.6) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: isDynamic ? Colors.black.withValues(alpha: 0.2) : Colors.grey[300]!,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AiExpertChatScreen(),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.smart_toy,
+                    color: Colors.green,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '免费AI专家解答',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDynamic ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.green,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -445,7 +514,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                           ],
                         ),
                         child: ClipOval(
-                          child: Image.network(
+                          child: Image.asset(
                             expert['avatar'],
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
@@ -739,7 +808,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                             ),
                           ),
                           child: ClipOval(
-                            child: Image.network(
+                            child: Image.asset(
                               expert['avatar'],
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
@@ -990,7 +1059,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                     // 模拟评价
                     _buildReviewItem(
                       name: '李**',
-                      avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+                      avatar: 'assets/images/avatar/anon_t.png',
                       rating: 5.0,
                       date: '2025-06-28',
                       content: '非常专业的建议，解决了我家绿萝叶子发黄的问题，谢谢专家！',
@@ -1000,8 +1069,8 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                     const Divider(height: 32),
 
                     _buildReviewItem(
-                      name: '张**',
-                      avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+                      name: '丰川**',
+                      avatar: 'assets/images/avatar/saki_p.png',
                       rating: 4.5,
                       date: '2025-06-25',
                       content: '咨询过程很愉快，专家很耐心地解答了我所有问题，提供了很多有用的建议。',
@@ -1112,7 +1181,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                 ),
               ),
               child: ClipOval(
-                child: Image.network(
+                child: Image.asset(
                   avatar,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
@@ -1188,7 +1257,9 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          backgroundColor: isDynamic ? Colors.black.withValues(alpha: 0.9) : Colors.white,
+          backgroundColor: isDynamic
+              ? Colors.black.withValues(alpha: 0.9)
+              : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1213,7 +1284,7 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                 Row(
                   children: [
                     ClipOval(
-                      child: Image.network(
+                      child: Image.asset(
                         expert['avatar'],
                         width: 50,
                         height: 50,
@@ -1248,7 +1319,8 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                             expert['specialty'],
                             style: TextStyle(
                               fontSize: 14,
-                              color: isDynamic ? Colors.white70 : Colors.grey[600],
+                              color: isDynamic ? Colors.white70 : Colors
+                                  .grey[600],
                             ),
                           ),
                         ],
@@ -1289,14 +1361,16 @@ class _ExpertConsultationScreenState extends State<ExpertConsultationScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDynamic ? Colors.orange[300] : Colors.orange[700],
+                              color: isDynamic ? Colors.orange[300] : Colors
+                                  .orange[700],
                             ),
                           ),
                           Text(
                             '/次',
                             style: TextStyle(
                               fontSize: 14,
-                              color: isDynamic ? Colors.white60 : Colors.grey[600],
+                              color: isDynamic ? Colors.white60 : Colors
+                                  .grey[600],
                             ),
                           ),
                         ],

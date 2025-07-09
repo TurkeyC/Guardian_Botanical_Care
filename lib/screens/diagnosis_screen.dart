@@ -22,6 +22,7 @@ import '../widgets/apple_style_widgets.dart';
 import '../widgets/apple_animations.dart';
 import 'ai_diagnosis_screen.dart'; // 导入AI诊断页面
 import 'expert_consultation_screen.dart'; // 导入专家咨询页面
+import 'community_forum_screen.dart'; // 导入社区问答页面
 
 class DiagnosisScreen extends StatefulWidget {
   const DiagnosisScreen({super.key});
@@ -118,7 +119,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
                   description: '与其他植物爱好者交流经验',
                   gradientColors: AppThemes.appleGreenGradient,
                   delay: 200,
-                  onTap: () => _showComingSoonDialog(context, '社区问答'),
+                  onTap: () => _navigateToCommunityForum(context),
                 ),
                 const SizedBox(height: 16),
                 _buildDynamicFeatureCard(
@@ -204,7 +205,7 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
                 title: '社区问答',
                 description: '与其他植物爱好者交流经验',
                 color: Colors.green,
-                onTap: () => _showComingSoonDialog(context, '社区问答'),
+                onTap: () => _navigateToCommunityForum(context),
               ),
               const SizedBox(height: 16),
               _buildFeatureCard(
@@ -629,6 +630,36 @@ class _DiagnosisScreenState extends State<DiagnosisScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const ExpertConsultationScreen()),
+      );
+    });
+  }
+
+  void _navigateToCommunityForum(BuildContext context) {
+    // 显示加载中提示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('社区问答'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('正在加载社区问答页面...'),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(),
+          ],
+        ),
+      ),
+    );
+
+    // 延迟一会后关闭对话框并跳转到社区问答页面
+    Future.delayed(const Duration(seconds: 2), () {
+      // 关闭加载对话框
+      Navigator.pop(context);
+      // 导航到社区问答页面
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CommunityForumScreen()),
       );
     });
   }
