@@ -44,3 +44,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /项目规划/签名密钥
+/项目规划/社区问答.md
