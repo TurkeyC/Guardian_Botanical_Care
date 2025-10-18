@@ -16,6 +16,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../models/api_preset.dart';
 import '../providers/settings_provider.dart';
 
 class ServiceSettingsScreen extends StatefulWidget {
@@ -42,6 +44,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
   final _weatherApiUrlController = TextEditingController();
 
   String _selectedPlantApiType = 'inaturalist';
+  String? _activePresetId;
 
   // 添加测试状态跟踪
   bool _isTestingLLM = false;
@@ -58,20 +61,26 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
   void _loadSettings() async {
     final settingsProvider = context.read<SettingsProvider>();
     await settingsProvider.loadSettings();
+    if (!mounted) return;
+    _syncFormFromProvider(settingsProvider);
+  }
+
+  void _syncFormFromProvider(SettingsProvider provider) {
+    _inaturalistUrlController.text = provider.inaturalistApiUrl;
+    _inaturalistTokenController.text = provider.inaturalistToken;
+    _llmApiUrlController.text = provider.llmApiUrl;
+    _llmApiKeyController.text = provider.llmApiKey;
+    _llmModelController.text = provider.llmModel;
+    _vlmApiUrlController.text = provider.vlmApiUrl;
+    _vlmApiKeyController.text = provider.vlmApiKey;
+    _vlmModelController.text = provider.vlmModel;
+    _plantIdApiKeyController.text = provider.plantIdApiKey;
+    _weatherApiKeyController.text = provider.weatherApiKey;
+    _weatherApiUrlController.text = provider.weatherApiUrl;
 
     setState(() {
-      _selectedPlantApiType = settingsProvider.plantIdentificationApiType;
-      _inaturalistUrlController.text = settingsProvider.inaturalistApiUrl;
-      _inaturalistTokenController.text = settingsProvider.inaturalistToken;
-      _llmApiUrlController.text = settingsProvider.llmApiUrl;
-      _llmApiKeyController.text = settingsProvider.llmApiKey;
-      _llmModelController.text = settingsProvider.llmModel;
-      _vlmApiUrlController.text = settingsProvider.vlmApiUrl;
-      _vlmApiKeyController.text = settingsProvider.vlmApiKey;
-      _vlmModelController.text = settingsProvider.vlmModel;
-      _plantIdApiKeyController.text = settingsProvider.plantIdApiKey;
-      _weatherApiKeyController.text = settingsProvider.weatherApiKey;
-      _weatherApiUrlController.text = settingsProvider.weatherApiUrl;
+      _selectedPlantApiType = provider.plantIdentificationApiType;
+      _activePresetId = provider.activeApiPresetId;
     });
   }
 
@@ -117,6 +126,9 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                _buildApiPresetSection(settingsProvider),
+                const SizedBox(height: 24),
+
                 // 植物识别API选择
                 _buildPlantIdentificationSection(),
                 const SizedBox(height: 24),
@@ -151,6 +163,218 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildApiPresetSection(SettingsProvider settingsProvider) {
+    final List<ApiPreset> presets = settingsProvider.apiPresets;
+    final bool hasPresets = presets.isNotEmpty;
+    String? dropdownValue = _activePresetId;
+
+    if (hasPresets) {
+      final exists = presets.any((preset) => preset.id == dropdownValue);
+      if (!exists) {
+        dropdownValue = presets.first.id;
+      }
+    } else {
+      dropdownValue = null;
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.folder_special_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'API预设管理',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: dropdownValue,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '当前预设',
+              ),
+              items: presets
+                  .map((preset) => DropdownMenuItem(
+                        value: preset.id,
+                        child: Text(preset.name),
+                      ))
+                  .toList(),
+              onChanged: hasPresets
+                  ? (value) {
+                      if (value != null) {
+                        _onPresetSelected(value);
+                      }
+                    }
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    '为不同环境保存一套API配置，方便在测试、生产或备份服务之间快速切换。',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.grey[600]),
+                  ),
+                ),
+                IconButton(
+                  tooltip: '新增预设',
+                  onPressed: () => _handleAddPreset(settingsProvider),
+                  icon: const Icon(Icons.add),
+                ),
+                IconButton(
+                  tooltip: '重命名当前预设',
+                  onPressed: (dropdownValue == null)
+                      ? null
+                      : () => _handleRenamePreset(settingsProvider, dropdownValue!),
+                  icon: const Icon(Icons.edit),
+                ),
+                IconButton(
+                  tooltip: '删除当前预设',
+                  onPressed: (dropdownValue == null || presets.length <= 1)
+                      ? null
+                      : () => _handleDeletePreset(settingsProvider, dropdownValue!),
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onPresetSelected(String presetId) async {
+    final provider = context.read<SettingsProvider>();
+    await provider.setActiveApiPreset(presetId);
+    if (!mounted) return;
+    _syncFormFromProvider(provider);
+  }
+
+  Future<void> _handleAddPreset(SettingsProvider provider) async {
+    final name = await _showPresetNameDialog(
+      title: '新增预设',
+      initialName: '新预设',
+    );
+    if (name == null) return;
+
+    await provider.addApiPreset(name, cloneFromActive: true);
+    if (!mounted) return;
+    _syncFormFromProvider(provider);
+  }
+
+  Future<void> _handleRenamePreset(SettingsProvider provider, String presetId) async {
+    final preset = _findPresetById(provider, presetId);
+    if (preset == null) return;
+
+    final name = await _showPresetNameDialog(
+      title: '重命名预设',
+      initialName: preset.name,
+    );
+    if (name == null) return;
+
+    await provider.renameApiPreset(presetId, name);
+    if (!mounted) return;
+    _syncFormFromProvider(provider);
+  }
+
+  Future<void> _handleDeletePreset(SettingsProvider provider, String presetId) async {
+    final preset = _findPresetById(provider, presetId);
+    if (preset == null) return;
+
+    final confirmed = await _showDeletePresetDialog(preset.name);
+    if (!confirmed) return;
+
+    await provider.deleteApiPreset(presetId);
+    if (!mounted) return;
+    _syncFormFromProvider(provider);
+  }
+
+  ApiPreset? _findPresetById(SettingsProvider provider, String presetId) {
+    for (final preset in provider.apiPresets) {
+      if (preset.id == presetId) {
+        return preset;
+      }
+    }
+    return null;
+  }
+
+  Future<String?> _showPresetNameDialog({
+    required String title,
+    required String initialName,
+  }) async {
+    final controller = TextEditingController(text: initialName);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: '预设名称',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+
+    if (result == null || result.isEmpty) {
+      return null;
+    }
+    return result;
+  }
+
+  Future<bool> _showDeletePresetDialog(String presetName) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('删除预设'),
+          content: Text('确定删除预设 "$presetName" 吗？此操作不可撤销。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('删除'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
   }
 
   Widget _buildPlantIdentificationSection() {
@@ -495,6 +719,7 @@ class _ServiceSettingsScreenState extends State<ServiceSettingsScreen> {
     );
 
     if (mounted) {
+      _syncFormFromProvider(settingsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('设置已保存')),
       );

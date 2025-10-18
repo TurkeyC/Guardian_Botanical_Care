@@ -16,7 +16,9 @@
 
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:io';
 import '../themes/app_themes.dart';
+import '../models/plant.dart';
 
 /// 毛玻璃AppBar - 苹果风格模糊背景
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -483,4 +485,413 @@ class ApplePageRoute<T> extends PageRoute<T> {
 
   @override
   Duration get transitionDuration => duration;
+}
+
+/// 植物卡片 - 简约风格
+class PlantCard extends StatelessWidget {
+  final Plant plant;
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
+
+  const PlantCard({
+    super.key,
+    required this.plant,
+    this.onTap,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // 植物图片
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: _buildPlantImage(),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // 植物信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plant.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (plant.scientificName.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        plant.scientificName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _buildHealthStatusChip(),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${(plant.confidence * 100).toInt()}%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // 删除按钮
+              if (onDelete != null)
+                IconButton(
+                  onPressed: onDelete,
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Colors.grey[600],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlantImage() {
+    // 检查是否是Demo模式的特殊标识
+    if (plant.imagePath == 'DEMO_ASSETS_IMAGE') {
+      return Image.asset(
+        'assets/demo/monstera.jpg',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: Icon(
+              Icons.image_not_supported,
+              color: Colors.grey[400],
+              size: 40,
+            ),
+          );
+        },
+      );
+    } else {
+      // 普通模式使用File图片
+      return Image.file(
+        File(plant.imagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[200],
+            child: Icon(
+              Icons.image_not_supported,
+              color: Colors.grey[400],
+              size: 40,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _buildHealthStatusChip() {
+    Color statusColor;
+    String statusText = plant.healthStatus;
+
+    switch (plant.healthStatus) {
+      case '健康':
+      case '优秀':
+        statusColor = Colors.green;
+        break;
+      case '良好':
+        statusColor = Colors.lightGreen;
+        break;
+      case '一般':
+        statusColor = Colors.orange;
+        break;
+      case '较差':
+      case '不健康':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: statusColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+/// 动态植物卡片 - 苹果风格
+class DynamicPlantCard extends StatelessWidget {
+  final Plant plant;
+  final VoidCallback? onTap;
+  final VoidCallback? onDelete;
+
+  const DynamicPlantCard({
+    super.key,
+    required this.plant,
+    this.onTap,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppThemes.glassBackground,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 植物图片
+                  Container(
+                    height: 200,
+                    width: double.infinity,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                      child: _buildPlantImage(),
+                    ),
+                  ),
+                  // 植物信息
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                plant.name,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (onDelete != null)
+                              IconButton(
+                                onPressed: onDelete,
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (plant.scientificName.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            plant.scientificName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            _buildHealthStatusChip(),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.verified,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${(plant.confidence * 100).toInt()}%',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlantImage() {
+    // 检查是否是Demo模式的特殊标识
+    if (plant.imagePath == 'DEMO_ASSETS_IMAGE') {
+      return Image.asset(
+        'assets/demo/monstera.jpg',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[800],
+            child: const Icon(
+              Icons.image_not_supported,
+              color: Colors.white54,
+              size: 60,
+            ),
+          );
+        },
+      );
+    } else {
+      // 普通模式使用File图片
+      return Image.file(
+        File(plant.imagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey[800],
+            child: const Icon(
+              Icons.image_not_supported,
+              color: Colors.white54,
+              size: 60,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _buildHealthStatusChip() {
+    Color statusColor;
+    String statusText = plant.healthStatus;
+
+    switch (plant.healthStatus) {
+      case '健康':
+      case '优秀':
+        statusColor = Colors.green;
+        break;
+      case '良好':
+        statusColor = Colors.lightGreen;
+        break;
+      case '一般':
+        statusColor = Colors.orange;
+        break;
+      case '较差':
+      case '不健康':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.5)),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: statusColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
 }

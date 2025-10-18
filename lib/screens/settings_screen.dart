@@ -21,6 +21,7 @@ import 'theme_settings_screen.dart';
 import 'service_settings_screen.dart';
 import 'membership_screen.dart';
 import 'video_player_screen.dart';
+import 'demo_showcase_screen.dart'; // 添加Demo展示页面导入
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -402,6 +403,44 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            // 添加Demo模式开关
+            Consumer<SettingsProvider>(
+              builder: (context, settings, child) {
+                return SwitchListTile(
+                  secondary: Icon(
+                    Icons.science_outlined,
+                    color: settings.isDemoMode
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                  title: const Text('Demo演示模式'),
+                  subtitle: Text(
+                    settings.isDemoMode
+                        ? '当前使用演示数据，所有识别功能将显示预设结果'
+                        : '开启后将使用演示数据，体验完整功能流程',
+                  ),
+                  value: settings.isDemoMode,
+                  onChanged: (bool value) {
+                    settings.toggleDemoMode(value);
+                    if (value) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Demo模式已开启，现在所有识别功能将使用演示数据'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Demo模式已关闭，将使用真实API进行识别'),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+            const Divider(),
             ...settingsItems.map((item) => ListTile(
               leading: Icon(
                 item['icon'] as IconData,

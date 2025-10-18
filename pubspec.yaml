@@ -107,6 +107,7 @@ flutter:
     - assets/images/plantpic/
     - assets/images/plantpic/comment/
     - android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+    - assets/demo/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

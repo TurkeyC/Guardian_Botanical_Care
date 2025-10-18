@@ -24,11 +24,13 @@ import '../providers/plant_provider.dart';
 class IdentificationResultScreen extends StatelessWidget {
   final PlantIdentificationResult result;
   final File imageFile;
+  final bool isDemoMode; // 添加Demo模式标识
 
   const IdentificationResultScreen({
     super.key,
     required this.result,
     required this.imageFile,
+    this.isDemoMode = false, // 默认为false
   });
 
   @override
@@ -46,10 +48,15 @@ class IdentificationResultScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               height: 250,
-              child: Image.file(
-                imageFile,
-                fit: BoxFit.cover,
-              ),
+              child: isDemoMode
+                  ? Image.asset(
+                      'assets/demo/monstera.jpg',
+                      fit: BoxFit.cover,
+                    )
+                  : Image.file(
+                      imageFile,
+                      fit: BoxFit.cover,
+                    ),
             ),
 
             Padding(
@@ -208,11 +215,14 @@ class IdentificationResultScreen extends StatelessWidget {
     // 从健康分析中提取健康状态
     final healthStatus = _extractHealthStatus(result.healthAnalysis);
 
+    // 在Demo模式下，使用特殊的imagePath来标识这是assets图片
+    final imagePath = isDemoMode ? 'DEMO_ASSETS_IMAGE' : imageFile.path;
+
     final plant = Plant(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: result.species,
       scientificName: result.scientificName,
-      imagePath: imageFile.path,
+      imagePath: imagePath,
       identificationDate: DateTime.now(),
       healthStatus: healthStatus,
       confidence: result.confidence,

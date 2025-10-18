@@ -344,7 +344,14 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
   Future<void> _processImage(File imageFile) async {
     final settingsProvider = context.read<SettingsProvider>();
 
-    // 检查设置完整性
+    // 检查是否为Demo模式
+    if (settingsProvider.isDemoMode) {
+      // Demo模式：使用预设数据
+      await _processDemoMode();
+      return;
+    }
+
+    // 正常模式：检查设置完整性
     if (!await settingsProvider.areSettingsComplete()) {
       _showSettingsIncompleteDialog();
       return;
@@ -463,6 +470,64 @@ class _PhotoIdentifyScreenState extends State<PhotoIdentifyScreen> {
 
     } catch (e) {
       _showErrorDialog('识别过程中出现错误: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _statusMessage = '';
+        });
+      }
+    }
+  }
+
+  /// Demo模式的处理方法
+  Future<void> _processDemoMode() async {
+    final settingsProvider = context.read<SettingsProvider>();
+
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = '正在识别植物品种...';
+    });
+
+    try {
+      // 模拟识别过程的延迟
+      await Future.delayed(const Duration(seconds: 2));
+
+      setState(() {
+        _statusMessage = '正在分析植物健康状况...';
+      });
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      setState(() {
+        _statusMessage = '正在生成养护建议...';
+      });
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      // 获取Demo数据
+      final demoResult = settingsProvider.getDemoPlantResult();
+
+      // 对于Demo模式，我们使用一个特殊的标识来表示这是assets图片
+      // 而不是真实的文件路径
+      final demoImageFile = File('DEMO_ASSETS_IMAGE'); // 特殊标识
+
+      // 导航到结果页面
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IdentificationResultScreen(
+              result: demoResult,
+              imageFile: demoImageFile,
+              isDemoMode: true, // 添加Demo模式标识
+            ),
+          ),
+        );
+      }
+
+    } catch (e) {
+      _showErrorDialog('Demo模式出现错误: $e');
     } finally {
       if (mounted) {
         setState(() {

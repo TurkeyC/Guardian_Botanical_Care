@@ -837,6 +837,29 @@ class _CareReminderScreenState extends State<CareReminderScreen> {
     );
   }
 
+  /// 为养护提醒页面构建植物图片 - 支持Demo模式
+  Widget _buildPlantImageForReminder(Plant plant) {
+    // 检查是否是Demo模式的特殊标识
+    if (plant.imagePath == 'DEMO_ASSETS_IMAGE') {
+      return Image.asset(
+        'assets/demo/monstera.jpg',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.eco_rounded, color: Colors.white),
+      );
+    } else if (plant.imagePath.isNotEmpty) {
+      // 正常模式使用File图片
+      return Image.file(
+        File(plant.imagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.eco_rounded, color: Colors.white),
+      );
+    } else {
+      // 没有图片时显示默认图标
+      return const Icon(Icons.eco_rounded, color: Colors.white);
+    }
+  }
   IconData _getWeatherIcon(String condition) {
     final lowerCondition = condition.toLowerCase();
     if (lowerCondition.contains('sun') || lowerCondition.contains('clear')) {
